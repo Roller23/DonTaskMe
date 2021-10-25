@@ -7,21 +7,27 @@
     <div class="inputs-wrapper">
       <div class="inputs">
         <p>
-          <input type="text" placeholder="Login" id="login-name" class="icon-login">
+          <input type="text" placeholder="Login" id="login-name" class="icon-login" v-model="loginName">
         </p>
         <p>
-          <input type="password" placeholder="Password" id="login-password" class="icon-password">
+          <input type="password" placeholder="Password" id="login-password" class="icon-password" v-model="loginPassword">
+        </p>
+        <p>
+          <button type="button" v-on:click="signIn">Sign in</button>
         </p>
       </div>
       <div class="inputs">
         <p>
-          <input type="text" placeholder="Login" id="register-name" class="icon-login">
+          <input type="text" placeholder="Login" id="register-name" class="icon-login" v-model="registerName">
         </p>
         <p>
-          <input type="password" placeholder="Password" id="register-password1" class="icon-password">
+          <input type="password" placeholder="Password" id="register-password1" class="icon-password" v-model="registerPassword1">
         </p>
         <p>
-          <input type="password" placeholder="Confirm password" id="register-password2" class="icon-password">
+          <input type="password" placeholder="Repeat password" id="register-password2" class="icon-password" v-model="registerPassword2">
+        </p>
+        <p>
+          <button type="button" v-on:click="signUp">Sign up</button>
         </p>
       </div>
     </div>
@@ -36,7 +42,11 @@ export default {
   },
   data() {
     return {
-      
+      loginName: '',
+      loginPassword: '',
+      registerName: '',
+      registerPassword1: '',
+      registerPassword2: ''
     }
   },
   created() {
@@ -51,6 +61,29 @@ export default {
       } else {
         document.querySelector('.inputs-wrapper').classList.remove('register')
       }
+    },
+    signIn() {
+      const login = this.$data.loginName;
+      const password = this.$data.loginPassword;
+      if (!login) return alert(`Login can't be empty`)
+      if (!password) return alert(`Password can't be empty`)
+      // TODO: send to backend
+    },
+    async signUp() {
+      const login = this.$data.registerName;
+      const password1 = this.$data.registerPassword1;
+      const password2 = this.$data.registerPassword2;
+      if (!login) return alert(`Login can't be empty`)
+      if (!password1) return alert(`Password can't be empty`)
+      if (!password2) return alert(`Password can't be empty`)
+      if (password1 !== password2) return alert(`Passwords must match`)
+      // TODO: send to backend
+      const body = {nickname: login, password: password1};
+      const res = await fetch(`${this.backendUrl}/register`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+      })
+      const json = await res.json();
+      console.log(json)
     }
   }
 }
@@ -89,7 +122,7 @@ export default {
   .inputs-wrapper {
     overflow: hidden;
     width: 200%;
-    margin-top: 30px;
+    margin-top: 15px;
     height: calc(100% - 30px);
     transition: 0.5s;
   }
@@ -113,6 +146,27 @@ export default {
     outline: none;
     border-left: 2px solid transparent;
     transition: 0.2s;
+  }
+
+  .inputs button {
+    cursor: pointer;
+    border: 0px;
+    padding: 10px 30px;
+    color: white;
+    background-color: black;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition: 0.3s;
+  }
+
+  .inputs button:hover {
+    transform: translate(-2px, -2px);
+  }
+
+  .inputs button:active {
+    transition: 0s;
+    transform: translate(0px, 0px);
+    background-color: rgb(27, 27, 27);
   }
 
   .inputs input:focus {

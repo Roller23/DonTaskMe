@@ -28,9 +28,7 @@ export default {
   },
   methods: {
     async setStatus() {
-      // TODO: export backend url elsewhere
-      const backendUrl = 'https://don-task-me.herokuapp.com';
-      const backendStatus = await (await fetch(`${backendUrl}/healthcheck`)).json();
+      const backendStatus = await (await fetch(`${this.backendUrl}/healthcheck`)).json();
       console.log(backendStatus)
       this.status = backendStatus.Status
     },

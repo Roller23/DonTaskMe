@@ -7,21 +7,21 @@
     <div class="inputs-wrapper">
       <div class="inputs">
         <p>
-          <input type="text" placeholder="Login">
+          <input type="text" placeholder="Login" id="login-name" class="icon-login">
         </p>
         <p>
-          <input type="password" placeholder="Password">
+          <input type="password" placeholder="Password" id="login-password" class="icon-password">
         </p>
       </div>
       <div class="inputs">
         <p>
-          <input type="text" placeholder="Login">
+          <input type="text" placeholder="Login" id="register-name" class="icon-login">
         </p>
         <p>
-          <input type="password" placeholder="Password">
+          <input type="password" placeholder="Password" id="register-password1" class="icon-password">
         </p>
         <p>
-          <input type="password" placeholder="Confirm password">
+          <input type="password" placeholder="Confirm password" id="register-password2" class="icon-password">
         </p>
       </div>
     </div>
@@ -103,12 +103,26 @@ export default {
   }
 
   .inputs input {
-    border-radius: 20px;
+    border-radius: 5px;
     border: 0px;
     padding: 10px 20px;
+    padding-left: 40px;
     font-size: 14px;
     background-color: rgb(32, 32, 32);
     color: white;
     outline: none;
+    border: 0px solid white;
+  }
+
+  .icon-login, .icon-password {
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+  .icon-login {
+    background-image: url(~@/assets/login-icon.png);
+  }
+  .icon-password {
+    background-image: url(~@/assets/password-icon.png);
   }
 </style>

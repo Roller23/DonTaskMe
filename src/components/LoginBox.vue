@@ -111,7 +111,12 @@ export default {
     background-color: rgb(32, 32, 32);
     color: white;
     outline: none;
-    border: 0px solid white;
+    border-left: 2px solid transparent;
+    transition: 0.2s;
+  }
+
+  .inputs input:focus {
+    border-left: 2px solid rgb(200, 200, 200);
   }
 
   .icon-login, .icon-password {

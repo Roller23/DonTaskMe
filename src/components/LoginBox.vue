@@ -1,8 +1,8 @@
 <template>
   <div class='box'>
     <div class="tabs">
-      <div class="tab selected">Login</div>
-      <div class="tab">Register</div>
+      <div class="tab selected" v-on:click="selectTab($event)">Login</div>
+      <div class="tab" v-on:click="selectTab($event)">Register</div>
     </div>
   </div>
 </template>
@@ -22,7 +22,10 @@ export default {
 
   },
   methods: {
-    
+    selectTab(e) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('selected'))
+      e.target.classList.add('selected')
+    }
   }
 }
 </script>
@@ -48,9 +51,10 @@ export default {
     text-align: center;
     padding: 10px 0px;
     transition: 0.5s;
+    background-color: rgb(32, 32, 32);
   }
 
   .tab.selected {
-    background-color: rgb(32, 32, 32);
+    background-color: rgba(56, 56, 56, 0.95);
   }
 </style>

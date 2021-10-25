@@ -59,12 +59,14 @@ export default {
 <style scoped>
   .box {
     position: absolute;
-    left: 0px;
-    bottom: 20%;
+    left: 50%;
+    top: 50%;
     width: 400px;
     height: 300px;
-    border-radius: 0px 20px 20px 0px;
-    background-color: rgb(49, 49, 49);
+    border-radius: 20px;
+    transform: translate(-50%, -50%);
+    background-color: rgba(170, 170, 170, 0.3);
+    backdrop-filter: blur(5px);
     overflow: hidden;
   }
   .tabs {
@@ -81,7 +83,7 @@ export default {
   }
 
   .tab.selected {
-    background-color: rgb(49, 49, 49);
+    background-color: rgba(0, 0, 0, 0.0);
   }
 
   .inputs-wrapper {
@@ -101,10 +103,11 @@ export default {
   }
 
   .inputs input {
-    border-radius: 15px;
+    border-radius: 20px;
     border: 0px;
-    padding: 5px 15px;
-    background-color: black;
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: rgb(32, 32, 32);
     color: white;
     outline: none;
   }

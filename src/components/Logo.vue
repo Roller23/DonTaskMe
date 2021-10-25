@@ -1,5 +1,5 @@
 <template>
-  <img class="logo" src="@/assets/don-logo.jpg">
+  <img class="logo" src="@/assets/don-logo2.png">
 </template>
 
 <style scoped>
@@ -7,7 +7,6 @@
     position: absolute;
     top: 5%;
     right: 5%;
-    width: 300px;
-    border-radius: 30px;
+    width: 400px;
   }
 </style>

@@ -1,6 +1,9 @@
 <template>
   <div class='box'>
-
+    <div class="tabs">
+      <div class="tab selected">Login</div>
+      <div class="tab">Register</div>
+    </div>
   </div>
 </template>
 
@@ -33,5 +36,21 @@ export default {
     height: 550px;
     border-radius: 0px 20px 20px 0px;
     background-color: rgba(56, 56, 56, 0.95);
+    overflow: hidden;
+  }
+  .tabs {
+    display: flex;
+  }
+  .tab {
+    color: white;
+    width: 100%;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px 0px;
+    transition: 0.5s;
+  }
+
+  .tab.selected {
+    background-color: rgb(32, 32, 32);
   }
 </style>

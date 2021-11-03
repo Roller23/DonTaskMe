@@ -17,25 +17,31 @@
 		<div id="moreTabs">
 			<Tab
 				class="tab"
-				v-if="moreTab.tabsFolded.length > 0"
-				:name="moreTab.name"
-				:dropShowing="moreTab.isDropShown"
-				@click="showDrop(moreTab)"
-				:ref="setTabRef(moreTab)"
+				v-if="moreTabs.moreTab.tabsFolded.length > 0"
+				:name="moreTabs.moreTab.name"
+				:dropShowing="moreTabs.moreTab.isDropShown"
+				@click="showDrop(moreTabs.moreTab)"
+				:ref="setTabRef(moreTabs.moreTab)"
 			>
-				<MoreTab class="tab-pop-over" />
+				<MorePopover class="tab-pop-over" />
 			</Tab>
 			<Tab
 				class="tab"
-				:name="moreTab.tabsFolded.length > 0 ? '+' : 'Utwórz'"
-				:dropShowing="moreTab.isDropShown"
-				@click="showDrop(moreTab)"
-				:ref="setTabRef(moreTab)"
+				:name="
+					moreTabs.moreTab.tabsFolded.length > 0
+						? '+'
+						: moreTabs.createTab.name
+				"
+				:dropShowing="moreTabs.createTab.isDropShown"
+				arrowDown="false"
+				@click="showDrop(moreTabs.createTab)"
+				:ref="setTabRef(moreTabs.createTab)"
 			>
+				<CreatePopover class="tab-pop-over" />
 			</Tab>
 		</div>
 		<div id="rightTabs">
-			<Tab>a</Tab>
+			<input class="tab" />
 			<Tab>b</Tab>
 			<Tab>konto</Tab>
 		</div>
@@ -43,64 +49,14 @@
 </template>
 
 <script>
-import AtlassianMenu from "../AtlassianMenu.vue";
-import Tab from "./Tab.vue";
-
-const WorkspaceTab = {
-	data() {
-		return {
-			title: "Przestrzenie robocze",
-		};
-	},
-	render() {
-		return <div> {this.title}</div>;
-	},
-};
-
-const RecentBoardsTab = {
-	data() {
-		return {
-			title: "Ostatnie Tablice",
-		};
-	},
-	render() {
-		return <div> {this.title}</div>;
-	},
-};
-
-const StarredBoardsTab = {
-	data() {
-		return {
-			title: "Oznaczone Tablice",
-		};
-	},
-	render() {
-		return <div> {this.title}</div>;
-	},
-};
-
-const TemplatesTab = {
-	data() {
-		return {
-			title: "Szablony",
-		};
-	},
-	render() {
-		return <div> {this.title}</div>;
-	},
-};
-
-const MoreTab = {
-	data() {
-		return {
-			title: "Więcej",
-			tabsFolded: [],
-		};
-	},
-	render() {
-		return <div> {this.title}</div>;
-	},
-};
+import AtlassianMenu from "./Tabs/AtlassianMenu.vue";
+import Tab from "./Tabs/Tab.vue";
+import WorkspacePopover from "./Popovers/WorkspacePopover.vue";
+import RecentBoardsPopover from "./Popovers/RecentBoardsPopover.vue";
+import StarredBoardsPopover from "./Popovers/StarredBoardsPopover.vue";
+import TemplatesPopover from "./Popovers/TemplatesPopover.vue";
+import MorePopover from "./Popovers/MorePopover.vue";
+import CreatePopover from "./Popovers/CreatePopover.vue";
 
 export default {
 	data() {
@@ -110,34 +66,42 @@ export default {
 				{
 					name: "Przestrzenie robocze",
 					id: 0,
-					comp: "WorkspaceTab",
+					comp: "WorkspacePopover",
 					isDropShown: false,
 				},
 				{
 					name: "Ostatnie",
 					id: 1,
-					comp: "RecentBoardsTab",
+					comp: "RecentBoardsPopover",
 					isDropShown: false,
 				},
 				{
 					name: "Oznaczone gwiazdką",
 					id: 2,
-					comp: "StarredBoardsTab",
+					comp: "StarredBoardsPopover",
 					isDropShown: false,
 				},
 				{
 					name: "Szablony",
 					id: 3,
-					comp: "TemplatesTab",
+					comp: "TemplatesPopover",
 					isDropShown: false,
 				},
 			],
-			moreTab: {
-				name: "Więcej",
-				id: 4,
-				comp: "MoreTab",
-				isDropShown: false,
-				tabsFolded: [],
+			moreTabs: {
+				moreTab: {
+					name: "Więcej",
+					id: 4,
+					comp: "MorePopover",
+					isDropShown: false,
+					tabsFolded: [],
+				},
+				createTab: {
+					name: "Utwórz",
+					id: 5,
+					comp: "CreatePopover",
+					isDropShown: false,
+				},
 			},
 			tabRefs: [],
 		};
@@ -145,11 +109,12 @@ export default {
 	components: {
 		AtlassianMenu,
 		Tab,
-		WorkspaceTab,
-		RecentBoardsTab,
-		StarredBoardsTab,
-		TemplatesTab,
-		MoreTab,
+		WorkspacePopover,
+		RecentBoardsPopover,
+		StarredBoardsPopover,
+		TemplatesPopover,
+		MorePopover,
+		CreatePopover,
 	},
 	methods: {
 		showDrop(ref) {
@@ -167,17 +132,18 @@ export default {
 			if (
 				(functabs.offsetTop > 30 ||
 					moreTab.offsetTop > 30 ||
+					weirdTab.offsetTop > 30 ||
 					marginWeird < 15) &&
 				this.tabs.length > 0
 			) {
 				let toFold = this.tabs.pop();
 				toFold.isDropShown = false;
-				this.moreTab.tabsFolded.push(toFold);
+				this.moreTabs.moreTab.tabsFolded.push(toFold);
 				this.breakPoints.push(window.innerWidth);
-			} else if (this.moreTab.tabsFolded.length > 0) {
+			} else if (this.moreTabs.moreTab.tabsFolded.length > 0) {
 				let currWidth = window.innerWidth;
 				if (currWidth > this.breakPoints[this.breakPoints.length - 1]) {
-					let toUnfold = this.moreTab.tabsFolded.pop();
+					let toUnfold = this.moreTabs.moreTab.tabsFolded.pop();
 					this.tabs.push(toUnfold);
 					this.breakPoints.pop();
 				}
@@ -226,8 +192,6 @@ export default {
 
 #moreTabs {
 	display: flex;
-	flex-wrap: wrap;
-	flex-direction: row;
 }
 
 #rightTabs {
@@ -247,9 +211,5 @@ export default {
 	height: auto;
 	background-color: white;
 	color: #5e6c84;
-}
-
-* {
-	border: 1 px red solid;
 }
 </style>

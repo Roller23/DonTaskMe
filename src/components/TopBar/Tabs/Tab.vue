@@ -2,13 +2,13 @@
 	<div class="tab">
 		<div>{{ this.name }}</div>
 		<slot v-if="this.dropShowing" />
-		<img src="../../assets/down-arrow.png" />
+		<img v-if="!this.arrowDown" src="../../../assets/down-arrow.png" />
 	</div>
 </template>
 
 <script>
 export default {
-	props: ["name", "dropShowing"],
+	props: ["name", "dropShowing", "arrowDown"],
 	data() {
 		return {
 			showDrop: this.dropShowing,

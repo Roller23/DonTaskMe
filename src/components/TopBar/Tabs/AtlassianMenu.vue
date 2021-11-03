@@ -1,6 +1,6 @@
 <template>
 	<div class="tab">
-		<img src="../assets/apps.png" class="apps-switch" />
+		<img src="../../../assets/apps.png" class="apps-switch" />
 	</div>
 </template>
 

@@ -25,6 +25,19 @@
 			>
 				<MoreTab class="tab-pop-over" />
 			</Tab>
+			<Tab
+				class="tab"
+				:name="moreTab.tabsFolded.length > 0 ? '+' : 'Utwórz'"
+				:dropShowing="moreTab.isDropShown"
+				@click="showDrop(moreTab)"
+				:ref="setTabRef(moreTab)"
+			>
+			</Tab>
+		</div>
+		<div id="rightTabs">
+			<Tab>a</Tab>
+			<Tab>b</Tab>
+			<Tab>konto</Tab>
 		</div>
 	</div>
 </template>
@@ -92,7 +105,7 @@ const MoreTab = {
 export default {
 	data() {
 		return {
-			prevWidth: [],
+			breakPoints: [],
 			tabs: [
 				{
 					name: "Przestrzenie robocze",
@@ -144,18 +157,29 @@ export default {
 			this.tabRefs.find((t) => t.id == ref.id).isDropShown = true;
 		},
 		detectWrap() {
-			var moreTab = document.getElementById("moreTabs");
+			var moreTab = document.getElementById("moreTabs").lastElementChild;
+			var weirdTab = document.getElementById("rightTabs");
 			var functabs = this.$refs.funcTabs;
-			if (functabs.offsetTop > 30 || moreTab.offsetTop > 30) {
+			var marginWeird = parseInt(
+				window.getComputedStyle(weirdTab).marginLeft,
+				10
+			);
+			if (
+				(functabs.offsetTop > 30 ||
+					moreTab.offsetTop > 30 ||
+					marginWeird < 15) &&
+				this.tabs.length > 0
+			) {
 				let toFold = this.tabs.pop();
+				toFold.isDropShown = false;
 				this.moreTab.tabsFolded.push(toFold);
-				this.prevWidth.push(window.innerWidth);
+				this.breakPoints.push(window.innerWidth);
 			} else if (this.moreTab.tabsFolded.length > 0) {
 				let currWidth = window.innerWidth;
-				if (currWidth > this.prevWidth[this.prevWidth.length - 1]) {
+				if (currWidth > this.breakPoints[this.breakPoints.length - 1]) {
 					let toUnfold = this.moreTab.tabsFolded.pop();
 					this.tabs.push(toUnfold);
-					this.prevWidth.pop();
+					this.breakPoints.pop();
 				}
 			}
 		},
@@ -200,9 +224,15 @@ export default {
 	background-color: rgba(128, 128, 128, 0.616);
 }
 
-#moreTab {
+#moreTabs {
 	display: flex;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
+	flex-direction: row;
+}
+
+#rightTabs {
+	display: flex;
+	margin-left: auto;
 }
 
 #funcTabs {

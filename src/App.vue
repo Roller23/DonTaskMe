@@ -1,13 +1,10 @@
 <template>
-  <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-  <!-- <HelloWorld msg="Welcome to DonTaskMe"/> -->
   <div class="blur-layer"></div>
   <LoginBox></LoginBox>
   <Logo></Logo>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
 import LoginBox from './components/LoginBox.vue'
 import Logo from './components/Logo.vue'
 
@@ -47,7 +44,6 @@ export default {
   left: 0px;
   width: 100vw;
   height: 100vh;
-  /* backdrop-filter: blur(3px); */
   background-color: rgba(0, 0, 0, 0.55);
 }
 </style>

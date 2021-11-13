@@ -92,8 +92,19 @@ export default {
           selectedWorkspace.boards[i].visible = true;
         }, (500 * !boardChanged) + (150 * i));
       }
+    },
+    caputereKeyboard(event) {
+      if (event.key !== 'Escape') return;
+      if (this.currentWorkspace === null) return;
+      this.hideBoards();
     }
-  }
+  },
+  mounted() {
+    document.addEventListener('keyup', this.caputereKeyboard);
+  },
+  beforeUnmount() {
+    document.removeEventListener('keyup', this.caputereKeyboard);
+  },
 }
 </script>
 

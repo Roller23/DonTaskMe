@@ -68,6 +68,8 @@ export default {
       if (!login) return alert(`Login can't be empty`)
       if (!password) return alert(`Password can't be empty`)
       // TODO: send to backend
+      this.$emit('loginFadeout')
+      console.log('emitted loginFadeout')
     },
     async signUp() {
       const login = this.$data.registerName;

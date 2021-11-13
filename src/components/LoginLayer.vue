@@ -1,9 +1,11 @@
 <template>
-  <div class="layer">
-    <div class="blur-layer"></div>
-    <LoginBox></LoginBox>
-    <Logo></Logo>
-  </div>
+  <transition name="fade">
+    <div class="layer" v-if="visible">
+      <div class="blur-layer"></div>
+      <LoginBox v-on:login-fadeout="visible = false"></LoginBox>
+      <Logo></Logo>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -14,6 +16,11 @@ export default {
   name: 'LoginLayer',
   components: {
     LoginBox, Logo
+  },
+  data() {
+    return {
+      visible: true
+    }
   }
 }
 </script>
@@ -37,5 +44,11 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.55);
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

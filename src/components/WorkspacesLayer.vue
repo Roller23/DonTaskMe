@@ -8,7 +8,7 @@
       <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
         <div v-for="workspace in workspaces"
             v-bind:key="workspace.title" class="workspace-wrap workspace"
-            :class="{hidden: workspace.hidden}"
+            :class="{hidden: workspace.hidden, selected: currentWorkspace === workspace}"
             @click="workspaceSelect(workspace)">
           <h2 class="title">{{workspace.title}}</h2>
           <p class="desc">{{workspace.desc}}</p>
@@ -242,13 +242,17 @@ export default {
   border-radius: 3px;
   transition: 0.3s;
   text-align: right;
+  border: 2px solid white;
 }
 .workspace-wrap.hidden {
   transform: translateX(-10%);
 }
-.workspace-wrap:hover {
-  transform: scale(1.01) translate(-2px, -2px);
-  box-shadow: 1px 1px 4px 1px rgb(199, 199, 199);
+.workspace-wrap:not(.selected):hover {
+  border: 2px solid #56AF9F;
+}
+
+.workspace-wrap.selected {
+  border-right: 4px solid #56AF9F;
 }
 
 .workspace-wrap .desc {

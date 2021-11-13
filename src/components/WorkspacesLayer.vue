@@ -21,6 +21,15 @@
             <h2 class="text">Choose a workspace to see its boards</h2>
           </div>
         </transition>
+        <transition name="fade">
+          <h1 v-if="currentWorkspace !== null">Boards in this workspace</h1>
+        </transition>
+        <div class="boards-wrap" v-if="currentWorkspace !== null">
+          <div class="board" v-for="board in currentWorkspace.boards"
+               v-bind:key="board.title" :class="{visible: board.visible}">
+            <h2 class="title">{{board.title}}</h2>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -35,16 +44,20 @@ export default {
   data() {
     return {
       workspaces: [
-        {title: 'Workspace 1', desc: 'Some description', hidden: false},
-        {title: 'Workspace 2', desc: 'Some description', hidden: false},
-        {title: 'Workspace 3', desc: 'Some description', hidden: false},
-        {title: 'Workspace 4', desc: 'Some description', hidden: false},
-        {title: 'Workspace 5', desc: 'Some description', hidden: false},
-        {title: 'Workspace 6', desc: 'Some description', hidden: false},
-        {title: 'Workspace 7', desc: 'Some description', hidden: false},
-        {title: 'Workspace 8', desc: 'Some description', hidden: false},
-        {title: 'Workspace 9', desc: 'Some description', hidden: false},
-        {title: 'Workspace 10', desc: 'Some description', hidden: false},
+        {title: 'Personal projects', desc: 'Some of the projects I am working on in my free time', hidden: false, boards: []},
+        {title: 'University', desc: 'Homework and TUL related stuff', hidden: false, boards: []},
+        {title: 'Work', desc: 'Zeus, Athena, Hermes etc...', hidden: false, boards: [
+          {title: 'Zeus', visible: false},
+          {title: 'Athena', visible: false},
+          {title: 'Hermes', visible: false},
+        ]},
+        {title: 'Todo', desc: 'Non-work related tasks', hidden: false, boards: []},
+        {title: 'Workspace 5', desc: 'Some description', hidden: false, boards: []},
+        {title: 'Workspace 6', desc: 'Some description', hidden: false, boards: []},
+        {title: 'Workspace 7', desc: 'Some description', hidden: false, boards: []},
+        {title: 'Workspace 8', desc: 'Some description', hidden: false, boards: []},
+        {title: 'Workspace 9', desc: 'Some description', hidden: false, boards: []},
+        {title: 'Workspace 10', desc: 'Some description', hidden: false, boards: []},
       ],
       currentWorkspace: null,
       workspacesText: 'Your workspaces'
@@ -52,9 +65,11 @@ export default {
   },
   methods: {
     workspaceSelect(selectedWorkspace) {
+      const boardChanged = this.currentWorkspace !== null;
       if (selectedWorkspace === this.currentWorkspace) {
         for (const workspace of this.workspaces) {
           workspace.hidden = false;
+          for (const board of workspace.boards) board.visible = false;
         }
         this.workspacesText = 'Your workspaces';
         this.currentWorkspace = null;
@@ -64,6 +79,14 @@ export default {
       this.currentWorkspace = selectedWorkspace
       for (const workspace of this.workspaces) {
         workspace.hidden = workspace !== selectedWorkspace;
+        if (workspace.hidden) {
+          for (const board of workspace.boards) board.visible = false;
+        }
+      }
+      for (let i = 0; i < selectedWorkspace.boards.length; i++) {
+        setTimeout(() => {
+          selectedWorkspace.boards[i].visible = true;
+        }, (500 * !boardChanged) + (150 * i));
       }
     }
   }
@@ -113,6 +136,29 @@ export default {
 .boards.expanded {
   transform: translateX(-37%);
   width: 80%;
+}
+.boards .board {
+  opacity: 0;
+  transition: 0.3s;
+  display: inline-block;
+  margin: 10px;
+  padding: 10px;
+  min-height: 100px;
+  min-width: 200px;
+  background-color: white;
+  border-radius: 15px;
+  cursor: pointer;
+}
+.boards .board:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 1px 1px 5px rgb(189, 189, 189);
+}
+.boards .board .title {
+  margin-top: 5px;
+  margin-left: 10px;
+}
+.boards .board.visible {
+  opacity: 1;
 }
 .chooseWorkspace {
   position: absolute;

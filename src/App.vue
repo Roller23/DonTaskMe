@@ -1,14 +1,16 @@
 <template>
+  <WorkspacesLayer></WorkspacesLayer>
   <LoginLayer></LoginLayer>
 </template>
 
 <script>
 import LoginLayer from './components/LoginLayer.vue'
+import WorkspacesLayer from './components/WorkspacesLayer.vue'
 
 export default {
   name: 'App',
   components: {
-    LoginLayer
+    LoginLayer, WorkspacesLayer
   }
 }
 </script>

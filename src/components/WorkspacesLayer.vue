@@ -30,6 +30,13 @@
           <div class="board" v-for="board in currentWorkspace.boards"
                v-bind:key="board.title" :class="{visible: board.visible}">
             <h2 class="title">{{board.title}}</h2>
+            <div class="more" @click="showBoardOptions(board)">
+              <img src="@/assets/ellipsis.png" alt="More board options">
+              <div class="options" :class="{visible: board.optionsOpen}">
+                <div class="option edit">Edit</div>
+                <div class="option delete" @click="deleteBoard(board)">Delete</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -64,6 +71,12 @@ class Workspace {
     }
     return this
   }
+  removeBoard(board) {
+    if (!(board instanceof Board)) return;
+    const index = this.boards.indexOf(board);
+    if (index === -1) return;
+    this.boards.splice(index, 1);
+  }
 }
 
 export default {
@@ -85,6 +98,7 @@ export default {
         new Workspace('Workspace 9', 'Some description'),
       ],
       currentWorkspace: null,
+      currentBoardOptions: null,
       workspacesText: 'Your workspaces'
     }
   },
@@ -120,6 +134,22 @@ export default {
       if (event.key !== 'Escape') return;
       if (this.currentWorkspace === null) return;
       this.hideBoards();
+    },
+    showBoardOptions(selectedBoard) {
+      if (this.currentBoardOptions === selectedBoard) {
+        this.currentBoardOptions.optionsOpen = false;
+        this.currentBoardOptions = null;
+        return;
+      }
+      for (const board of this.currentWorkspace.boards) {
+        board.optionsOpen = false;
+      }
+      selectedBoard.optionsOpen = true;
+      this.currentBoardOptions = selectedBoard;
+    },
+    deleteBoard(selectedBoard) {
+      if (!confirm(`Are you sure you want to delete ${selectedBoard.title}?`)) return;
+      this.currentWorkspace.removeBoard(selectedBoard)
     }
   },
   mounted() {
@@ -202,11 +232,11 @@ export default {
   min-height: 100px;
   min-width: 200px;
   background-color: white;
-  border-radius: 15px;
+  border-radius: 5px;
   cursor: pointer;
+  position: relative;
 }
 .boards .board:hover {
-  transform: translate(-3px, -3px);
   box-shadow: 1px 1px 5px rgb(189, 189, 189);
 }
 .boards .board .title {
@@ -215,6 +245,51 @@ export default {
 }
 .boards .board.visible {
   opacity: 1;
+}
+.boards .board .more {
+  position: absolute;
+  bottom: 0px;
+  left: 15px;
+  display: block;
+  cursor: pointer;
+}
+.boards .board .more img {
+  width: 20px;
+}
+.boards .board .more .options {
+  background-color: white;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  transform: translate(25px, calc(100% - 10px));
+  border-radius: 5px;
+  box-shadow: 1px 1px 3px rgb(195, 195, 195);
+  overflow: hidden;
+  height: 0px;
+  transition: 0.3s;
+}
+.boards .board .more .options.visible {
+  height: 63px;
+}
+.boards .board .more .option {
+  cursor: pointer;
+  font-weight: 500;
+  padding: 5px;
+  transition: 0.2s;
+}
+.boards .board .delete {
+  color: red;
+}
+.boards .board .delete:hover {
+  color: white;
+  background-color: red;
+}
+.boards .board .edit {
+  color: #56AF9F;
+}
+.boards .board .edit:hover {
+  color: white;
+  background-color: #56AF9F;
 }
 .choose-workspace {
   position: absolute;

@@ -38,6 +38,34 @@
 </template>
 
 <script>
+
+class Board {
+  constructor(title) {
+    this.title = title;
+    this.visible = false;
+  }
+}
+
+class Workspace {
+  constructor(title, desc, ...boards) {
+    this.title = title;
+    this.desc = desc;
+    this.boards = [];
+    this.hidden = false;
+    this.addBoards(boards)
+  }
+  addBoards(...boards) {
+    for (const board of boards) {
+      if (typeof board === 'string') {
+        this.boards.push(new Board(board))
+      } else if (board instanceof Board) {
+        this.boards.push(board)
+      }
+    }
+    return this
+  }
+}
+
 export default {
   name: 'WorkspacesLayer',
   components: {
@@ -46,24 +74,15 @@ export default {
   data() {
     return {
       workspaces: [
-        {title: 'Personal projects', desc: 'Some of the projects I am working on in my free time', hidden: false, boards: []},
-        {title: 'University', desc: 'Homework and TUL related stuff', hidden: false, boards: [
-          {title: 'DonTaskMe', visible: false},
-          {title: 'Squidventure', visible: false},
-          {title: 'Hermes', visible: false},
-          {title: 'Mish', visible: false},
-        ]},
-        {title: 'Work', desc: 'Zeus, Athena, Hermes etc...', hidden: false, boards: [
-          {title: 'Zeus', visible: false},
-          {title: 'Athena', visible: false},
-          {title: 'Hermes', visible: false},
-        ]},
-        {title: 'Todo', desc: 'Non-work related tasks', hidden: false, boards: []},
-        {title: 'Workspace 5', desc: 'Some description', hidden: false, boards: []},
-        {title: 'Workspace 6', desc: 'Some description', hidden: false, boards: []},
-        {title: 'Workspace 7', desc: 'Some description', hidden: false, boards: []},
-        {title: 'Workspace 8', desc: 'Some description', hidden: false, boards: []},
-        {title: 'Workspace 9', desc: 'Some description', hidden: false, boards: []},
+        new Workspace('Personal projects', 'Some of the projects I am working on in my free time'),
+        new Workspace('University', 'Homework and TUL related stuff').addBoards('DonTaskMe', 'Squidventure', 'Hermes', 'Mish'),
+        new Workspace('Work', 'Zeus, Athena, Hermes etc...').addBoards('Zeus', 'Athena', 'Hermes'),
+        new Workspace('Todo', 'Non-work related tasks'),
+        new Workspace('Workspace 5', 'Some description'),
+        new Workspace('Workspace 6', 'Some description'),
+        new Workspace('Workspace 7', 'Some description'),
+        new Workspace('Workspace 8', 'Some description'),
+        new Workspace('Workspace 9', 'Some description'),
       ],
       currentWorkspace: null,
       workspacesText: 'Your workspaces'

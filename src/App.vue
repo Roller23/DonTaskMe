@@ -1,17 +1,14 @@
 <template>
-  <div class="blur-layer"></div>
-  <LoginBox></LoginBox>
-  <Logo></Logo>
+  <LoginLayer></LoginLayer>
 </template>
 
 <script>
-import LoginBox from './components/LoginBox.vue'
-import Logo from './components/Logo.vue'
+import LoginLayer from './components/LoginLayer.vue'
 
 export default {
   name: 'App',
   components: {
-    LoginBox, Logo
+    LoginLayer
   }
 }
 </script>
@@ -32,17 +29,5 @@ export default {
   left: 0px;
   width: 100vw;
   height: 100vh;
-  background-image: url(./assets/don-background.jpeg);
-  background-size: cover;
-  background-position: center center;
-}
-
-.blur-layer {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.55);
 }
 </style>

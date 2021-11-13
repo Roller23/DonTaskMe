@@ -24,7 +24,7 @@
           <input type="password" placeholder="Password" id="register-password1" class="icon-password" v-model="registerPassword1">
         </p>
         <p>
-          <input type="password" placeholder="Repeat password" id="register-password2" class="icon-password" v-model="registerPassword2">
+          <input type="password" placeholder="Repeat password" id="register-password2" class="icon-password repeat" v-model="registerPassword2">
         </p>
         <p>
           <button type="button" v-on:click="signUp">Sign up</button>
@@ -183,5 +183,8 @@ export default {
   }
   .icon-password {
     background-image: url(~@/assets/password-icon.png);
+  }
+  .icon-password.repeat {
+    background-image: url(~@/assets/password-icon2.png);
   }
 </style>

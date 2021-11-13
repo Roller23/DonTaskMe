@@ -6,9 +6,6 @@
     <h1 class="top-text">{{workspacesText}}</h1>
     <div class="boxes-wrap">
       <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
-        <div class="workspace-wrap new-workspace">
-          Create a new workspace
-        </div>
         <div v-for="workspace in workspaces"
             v-bind:key="workspace.title" class="workspace-wrap workspace"
             :class="{hidden: workspace.hidden}"
@@ -19,9 +16,11 @@
       </div>
       <div class="boards" :class="{expanded: currentWorkspace !== null}">
         <transition name="fade">
-          <div class="chooseWorkspace" v-if="currentWorkspace === null">
+          <div class="choose-workspace" v-if="currentWorkspace === null">
             <img class="icon" src="@/assets/workspace.png" alt="Workspace icon">
             <h2 class="text">Choose a workspace to see its boards</h2>
+            <p class="text">or</p>
+            <h2 class="text new-workspace">Create a new one</h2>
           </div>
         </transition>
         <transition name="fade">
@@ -48,7 +47,12 @@ export default {
     return {
       workspaces: [
         {title: 'Personal projects', desc: 'Some of the projects I am working on in my free time', hidden: false, boards: []},
-        {title: 'University', desc: 'Homework and TUL related stuff', hidden: false, boards: []},
+        {title: 'University', desc: 'Homework and TUL related stuff', hidden: false, boards: [
+          {title: 'DonTaskMe', visible: false},
+          {title: 'Squidventure', visible: false},
+          {title: 'Hermes', visible: false},
+          {title: 'Mish', visible: false},
+        ]},
         {title: 'Work', desc: 'Zeus, Athena, Hermes etc...', hidden: false, boards: [
           {title: 'Zeus', visible: false},
           {title: 'Athena', visible: false},
@@ -193,27 +197,49 @@ export default {
 .boards .board.visible {
   opacity: 1;
 }
-.chooseWorkspace {
+.choose-workspace {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
 }
-.chooseWorkspace .icon {
+.choose-workspace .icon {
   width: 300px;
-  filter: grayscale(20%)
+  filter: grayscale(20%);
+  margin-bottom: 20px;
 }
-.chooseWorkspace .text {
+.choose-workspace .text {
   color: gray;
+}
+.choose-workspace h2 {
+  margin: 10px 0px;
+}
+.choose-workspace p {
+  margin: 10px 0px;
+}
+.choose-workspace .new-workspace {
+  font-size: 20px;
+  cursor: pointer;
+  color: #56AF9F;
+  border: 2px solid #56AF9F;
+  border-radius: 30px;
+  display: inline-table;
+  padding: 5px 15px;
+  margin: 0px;
+  transition: 0.3s;
+}
+.choose-workspace .new-workspace:hover {
+  background-color: #56AF9F;
+  color: white;
 }
 .workspace-wrap {
   cursor: pointer;
   padding: 10px 20px;
   background-color: white;
-  box-shadow: 1px 1px 1px 1px rgb(172, 172, 172);
+  box-shadow: 1px 1px 1px 1px rgb(216, 216, 216);
   margin-bottom: 10px;
-  border-radius: 5px;
+  border-radius: 3px;
   transition: 0.3s;
   text-align: right;
 }
@@ -222,7 +248,7 @@ export default {
 }
 .workspace-wrap:hover {
   transform: scale(1.01) translate(-2px, -2px);
-  box-shadow: 1px 1px 4px 2px rgb(172, 172, 172);
+  box-shadow: 1px 1px 4px 1px rgb(199, 199, 199);
 }
 
 .workspace-wrap .desc {

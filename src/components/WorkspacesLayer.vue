@@ -1,5 +1,8 @@
 <template>
   <div class="layer">
+    <div class="back-wrap" :class="{visible: currentWorkspace !== null}" @click="hideBoards">
+      <img src="@/assets/go-back-arrow.png" alt="Go back" class="go-back">
+    </div>
     <h1 class="top-text">{{workspacesText}}</h1>
     <div class="boxes-wrap">
       <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
@@ -57,23 +60,24 @@ export default {
         {title: 'Workspace 7', desc: 'Some description', hidden: false, boards: []},
         {title: 'Workspace 8', desc: 'Some description', hidden: false, boards: []},
         {title: 'Workspace 9', desc: 'Some description', hidden: false, boards: []},
-        {title: 'Workspace 10', desc: 'Some description', hidden: false, boards: []},
       ],
       currentWorkspace: null,
       workspacesText: 'Your workspaces'
     }
   },
   methods: {
+    hideBoards() {
+      for (const workspace of this.workspaces) {
+        workspace.hidden = false;
+        for (const board of workspace.boards) board.visible = false;
+      }
+      this.workspacesText = 'Your workspaces';
+      this.currentWorkspace = null;
+    },
     workspaceSelect(selectedWorkspace) {
       const boardChanged = this.currentWorkspace !== null;
       if (selectedWorkspace === this.currentWorkspace) {
-        for (const workspace of this.workspaces) {
-          workspace.hidden = false;
-          for (const board of workspace.boards) board.visible = false;
-        }
-        this.workspacesText = 'Your workspaces';
-        this.currentWorkspace = null;
-        return;
+        return this.hideBoards();
       }
       this.workspacesText = selectedWorkspace.title;
       this.currentWorkspace = selectedWorkspace
@@ -104,9 +108,27 @@ export default {
   padding: 20px;
   padding-bottom: 0px;
 }
+.back-wrap {
+  width: 0px;
+  display: inline-block;
+  margin-right: 0px;
+  overflow: hidden;
+  vertical-align: middle;
+  transform: translateY(-5px);
+  transition: 0.3s;
+}
+.back-wrap.visible {
+  width: 40px;
+  margin-right: 10px;
+}
+.back-wrap .go-back {
+  width: 40px;
+  cursor: pointer;
+}
 .top-text {
   height: 50px;
   margin: 0px;
+  display: inline-block;
 }
 .boxes-wrap {
   height: calc(100% - 50px);

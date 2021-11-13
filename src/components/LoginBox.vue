@@ -101,6 +101,7 @@ export default {
     background-color: rgba(170, 170, 170, 0.3);
     backdrop-filter: blur(5px);
     overflow: hidden;
+    text-align: center;
   }
   .tabs {
     display: flex;

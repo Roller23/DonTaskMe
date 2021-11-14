@@ -72,6 +72,9 @@ export default {
         method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
       });
       if (res.status === 200) {
+        const json = await res.json();
+        localStorage.setItem('token', json.token)
+        console.log('registered token', json.token)
         return this.$emit('loginFadeout')
       }
       try {

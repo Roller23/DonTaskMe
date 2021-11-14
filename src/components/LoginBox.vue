@@ -62,13 +62,25 @@ export default {
         document.querySelector('.inputs-wrapper').classList.remove('register')
       }
     },
-    signIn() {
+    async signIn() {
       const login = this.$data.loginName;
       const password = this.$data.loginPassword;
       if (!login) return alert(`Login can't be empty`)
       if (!password) return alert(`Password can't be empty`)
-      // TODO: send data to backend
-      this.$emit('loginFadeout')
+      const body = {username: login, password};
+      const res = await fetch(`${this.backendUrl}/login`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+      });
+      if (res.status === 200) {
+        return this.$emit('loginFadeout')
+      }
+      try {
+        const json = await res.json();
+        alert("Couldn't log in: " + json);
+      } catch (e) {
+        console.log(e);
+        alert('Server error!');
+      }
     },
     async signUp() {
       const login = this.$data.registerName;
@@ -78,13 +90,21 @@ export default {
       if (!password1) return alert(`Password can't be empty`)
       if (!password2) return alert(`Password can't be empty`)
       if (password1 !== password2) return alert(`Passwords must match`)
-      // TODO: send to backend
-      const body = {nickname: login, password: password1};
+      const body = {username: login, password: password1};
       const res = await fetch(`${this.backendUrl}/register`, {
         method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-      })
-      const json = await res.json();
-      console.log(json)
+      });
+      if (res.status === 201) {
+        alert('Account created!');
+      } else {
+        try {
+          const json = await res.json();
+          console.log(json)
+        } catch(e) {
+          console.log(e)
+        }
+        alert('Could not register');
+      }
     }
   }
 }

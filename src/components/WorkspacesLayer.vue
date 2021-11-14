@@ -20,7 +20,7 @@
             <img class="icon" src="@/assets/workspace.png" alt="Workspace icon">
             <h2 class="text">Choose a workspace to see its boards</h2>
             <p class="text">or</p>
-            <h2 class="text new-workspace">Create a new one</h2>
+            <h2 class="text new-workspace" @click="newWorkspace">Create a new one</h2>
           </div>
         </transition>
         <transition name="fade">
@@ -28,9 +28,10 @@
         </transition>
         <div class="boards-wrap" v-if="currentWorkspace !== null">
           <div class="board" v-for="board in currentWorkspace.boards"
-               v-bind:key="board.title" :class="{visible: board.visible}">
+               v-bind:key="board.title" :class="{visible: board.visible, 'new-board': board.newBoard}"
+               @click="board.newBoard ? createBoard() : enterBoard(board)">
             <h2 class="title">{{board.title}}</h2>
-            <div class="more" @click="showBoardOptions(board)">
+            <div class="more" @click="showBoardOptions(board)" v-if="!board.newBoard">
               <img src="@/assets/ellipsis.png" alt="More board options">
               <div class="options" :class="{visible: board.optionsOpen}">
                 <div class="option edit">Edit</div>
@@ -47,9 +48,10 @@
 <script>
 
 class Board {
-  constructor(title) {
+  constructor(title, newBoard = false) {
     this.title = title;
     this.visible = false;
+    this.newBoard = newBoard;
   }
 }
 
@@ -57,7 +59,7 @@ class Workspace {
   constructor(title, desc, ...boards) {
     this.title = title;
     this.desc = desc;
-    this.boards = [];
+    this.boards = [new Board('', true)];
     this.hidden = false;
     this.addBoards(boards)
   }
@@ -149,7 +151,22 @@ export default {
     },
     deleteBoard(selectedBoard) {
       if (!confirm(`Are you sure you want to delete ${selectedBoard.title}?`)) return;
+      // TODO: delete it on the backend
       this.currentWorkspace.removeBoard(selectedBoard)
+    },
+    newWorkspace() {
+      const title = prompt('Workspace title');
+      const desc = prompt('Workspace description');
+      const data = {title, desc};
+      // TODO: send it to the backend
+      return data;
+    },
+    createBoard() {
+      const title = prompt('Board title');
+      console.log(title)
+    },
+    enterBoard(board) {
+      console.log(board)
     }
   },
   mounted() {
@@ -235,6 +252,14 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   position: relative;
+  vertical-align: top;
+}
+.boards .board.new-board {
+  background-image: url(../assets/add.png);
+  background-size: 50px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border: 2px solid #56AF9F;
 }
 .boards .board:hover {
   box-shadow: 1px 1px 5px rgb(189, 189, 189);

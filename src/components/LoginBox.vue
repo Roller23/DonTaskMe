@@ -67,7 +67,8 @@ export default {
       const password = this.$data.loginPassword;
       if (!login) return alert(`Login can't be empty`)
       if (!password) return alert(`Password can't be empty`)
-      // TODO: send to backend
+      // TODO: send data to backend
+      this.$emit('loginFadeout')
     },
     async signUp() {
       const login = this.$data.registerName;
@@ -101,6 +102,7 @@ export default {
     background-color: rgba(170, 170, 170, 0.3);
     backdrop-filter: blur(5px);
     overflow: hidden;
+    text-align: center;
   }
   .tabs {
     display: flex;

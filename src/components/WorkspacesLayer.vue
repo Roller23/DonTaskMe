@@ -10,6 +10,12 @@
             v-bind:key="workspace.title" class="workspace-wrap workspace"
             :class="{hidden: workspace.hidden, selected: currentWorkspace === workspace}"
             @click="workspaceSelect(workspace)">
+          <div class="buttons">
+            <img src="@/assets/edit.png" alt="Edit button" class="button"
+            @click="editWorkspace($event, workspace)">
+            <img src="@/assets/delete.png" alt="Delete button" class="button"
+            @click="deleteWorkspace($event, workspace)">
+          </div>
           <h2 class="title">{{workspace.title}}</h2>
           <p class="desc">{{workspace.desc}}</p>
         </div>
@@ -167,6 +173,23 @@ export default {
     },
     enterBoard(board) {
       console.log(board)
+    },
+    editWorkspace(event, workspace) {
+      event.stopPropagation();
+      console.log(workspace);
+      const title = prompt('New title');
+      const desc = prompt('New description');
+      const data = {title, desc};
+      return data;
+    },
+    deleteWorkspace(event, workspace) {
+      event.stopPropagation();
+      console.log(workspace);
+      if (!confirm(`Are you sure you want to delete ${workspace.title} and all of its boards?`)) return;
+      // TODO: delete it on the backend
+      const index = this.workspaces.indexOf(workspace);
+      if (index === -1) return;
+      this.workspaces.splice(index, 1);
     }
   },
   mounted() {
@@ -362,6 +385,7 @@ export default {
   transition: 0.3s;
   text-align: right;
   border: 2px solid white;
+  position: relative;
 }
 .workspace-wrap.hidden {
   transform: translateX(-10%);
@@ -377,7 +401,21 @@ export default {
 .workspace-wrap .desc {
   color: gray;
 }
-
+.workspace-wrap .buttons {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.workspace-wrap .buttons .button {
+  display: inline-block;
+  cursor: pointer;
+  width: 25px;
+  opacity: 0.5;
+}
+.workspace-wrap .buttons .button:first-child {
+  margin-right: 25px;
+}
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }

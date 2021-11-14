@@ -165,7 +165,8 @@ export default {
       const desc = prompt('Workspace description');
       const data = {title, desc};
       // TODO: send it to the backend
-      return data;
+      const workspace = new Workspace(data.title, data.desc);
+      this.workspaces.push(workspace)
     },
     createBoard() {
       const title = prompt('Board title');

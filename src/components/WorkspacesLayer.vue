@@ -169,7 +169,9 @@ export default {
     },
     createBoard() {
       const title = prompt('Board title');
-      console.log(title)
+      const board = new Board(title);
+      board.visible = true;
+      this.currentWorkspace.boards.push(board)
     },
     enterBoard(board) {
       console.log(board)
@@ -262,6 +264,11 @@ export default {
 .boards.expanded {
   transform: translateX(-37%);
   width: 80%;
+}
+.boards-wrap {
+  overflow: auto;
+  white-space: initial;
+  padding-bottom: 50px;
 }
 .boards .board {
   opacity: 0;

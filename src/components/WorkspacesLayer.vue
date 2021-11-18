@@ -54,26 +54,26 @@
 <script>
 
 class Board {
-  constructor(title, newBoard = false) {
+  constructor(title, uid, newBoard = false) {
     this.title = title;
+    this.uid = uid;
     this.visible = false;
     this.newBoard = newBoard;
   }
 }
 
 class Workspace {
-  constructor(title, desc, ...boards) {
+  constructor(title, desc, uid, ...boards) {
     this.title = title;
     this.desc = desc;
-    this.boards = [new Board('', true)];
+    this.boards = [new Board('', '', true)];
     this.hidden = false;
+    this.uid = uid;
     this.addBoards(boards)
   }
   addBoards(...boards) {
     for (const board of boards) {
-      if (typeof board === 'string') {
-        this.boards.push(new Board(board))
-      } else if (board instanceof Board) {
+      if (board instanceof Board) {
         this.boards.push(board)
       }
     }
@@ -94,17 +94,7 @@ export default {
   },
   data() {
     return {
-      workspaces: [
-        new Workspace('Personal projects', 'Some of the projects I am working on in my free time'),
-        new Workspace('University', 'Homework and TUL related stuff').addBoards('DonTaskMe', 'Squidventure', 'Hermes', 'Mish'),
-        new Workspace('Work', 'Zeus, Athena, Hermes etc...').addBoards('Zeus', 'Athena', 'Hermes'),
-        new Workspace('Todo', 'Non-work related tasks'),
-        new Workspace('Workspace 5', 'Some description'),
-        new Workspace('Workspace 6', 'Some description'),
-        new Workspace('Workspace 7', 'Some description'),
-        new Workspace('Workspace 8', 'Some description'),
-        new Workspace('Workspace 9', 'Some description'),
-      ],
+      workspaces: [],
       currentWorkspace: null,
       currentBoardOptions: null,
       workspacesText: 'Your workspaces'
@@ -160,13 +150,43 @@ export default {
       // TODO: delete it on the backend
       this.currentWorkspace.removeBoard(selectedBoard)
     },
-    newWorkspace() {
+    async getWorkspaces() {
+      const url = new URL(`${this.backendUrl}/workspaces`);
+      url.searchParams.append('token', localStorage.token)
+      const res = await fetch(url, {method: 'GET'});
+      if (res.status === 200) {
+        const json = await res.json();
+        console.log(json)
+        for (const workspace of json) {
+          const newWorkspace = new Workspace(workspace.title, workspace.desc, workspace.uid);
+          for (const board of workspace.boards) {
+            newWorkspace.addBoards(new Board(board.title, board.uid))
+          }
+          this.workspaces.push(newWorkspace)
+        }
+      } else {
+        alert('Could not load workspaces');
+      }
+    },
+    async newWorkspace() {
       const title = prompt('Workspace title');
+      if (!title) {
+        return alert('Title cannot be empty');
+      }
       const desc = prompt('Workspace description');
-      const data = {title, desc};
-      // TODO: send it to the backend
-      const workspace = new Workspace(data.title, data.desc);
-      this.workspaces.push(workspace)
+      const body = {title, desc, token: localStorage.token};
+      const res = await fetch(`${this.backendUrl}/workspaces`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+      });
+      if (res.status === 201) {
+        const json = await res.json();
+        console.log(json)
+        alert('Workspace created');
+        const workspace = new Workspace(json.title, json.desc, json.uid);
+        this.workspaces.push(workspace)
+      } else {
+        console.log('Could not add the workspace');
+      }
     },
     createBoard() {
       const title = prompt('Board title');
@@ -185,21 +205,34 @@ export default {
       const data = {title, desc};
       return data;
     },
-    deleteWorkspace(event, workspace) {
+    async deleteWorkspace(event, workspace) {
       event.stopPropagation();
       console.log(workspace);
       if (!confirm(`Are you sure you want to delete ${workspace.title} and all of its boards?`)) return;
-      // TODO: delete it on the backend
-      const index = this.workspaces.indexOf(workspace);
-      if (index === -1) return;
-      this.workspaces.splice(index, 1);
+      const res = await fetch(`${this.backendUrl}/workspaces/${workspace.uid}`, {
+        method: 'DELETE'
+      });
+      if (res.status === 202) {
+        const index = this.workspaces.indexOf(workspace);
+        if (index === -1) return;
+        this.workspaces.splice(index, 1);
+      } else {
+        alert('Could not delete the workspace');
+      }
     }
   },
   mounted() {
     document.addEventListener('keyup', this.caputereKeyboard);
+    if (localStorage.token) {
+      this.getWorkspaces();
+    }
+    this.listeners.loadWorkspaces = () => {
+      this.getWorkspaces();
+    }
   },
   beforeUnmount() {
     document.removeEventListener('keyup', this.caputereKeyboard);
+    this.listeners.loadWorkspaces = () => {};
   },
 }
 </script>

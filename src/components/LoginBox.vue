@@ -74,7 +74,7 @@ export default {
       if (res.status === 200) {
         const json = await res.json();
         localStorage.setItem('token', json.token)
-        console.log('registered token', json.token)
+        this.listeners.loadWorkspaces();
         return this.$emit('loginFadeout')
       }
       try {

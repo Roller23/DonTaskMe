@@ -1,6 +1,6 @@
 <template>
   <WorkspacesLayer></WorkspacesLayer>
-  <LoginLayer></LoginLayer>
+  <LoginLayer v-if="!hasToken()"></LoginLayer>
 </template>
 
 <script>
@@ -11,6 +11,13 @@ export default {
   name: 'App',
   components: {
     LoginLayer, WorkspacesLayer
+  },
+  data() {
+    return {
+      hasToken() {
+        return !!localStorage.token;
+      }
+    }
   }
 }
 </script>

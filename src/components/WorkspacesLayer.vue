@@ -178,7 +178,6 @@ export default {
       if (res.status === 201) {
         const json = await res.json();
         console.log(json)
-        alert('Workspace created');
         const workspace = new Workspace(json.title, json.desc, json.uid);
         this.workspaces.push(workspace)
       } else {
@@ -193,7 +192,6 @@ export default {
       if (res.status === 201) {
         const json = await res.json();
         console.log(json)
-        alert('Board created');
         const board = new Board(json.title);
         board.visible = true;
         this.currentWorkspace.boards.push(board)

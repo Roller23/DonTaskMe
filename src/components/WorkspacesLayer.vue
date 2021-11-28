@@ -179,6 +179,7 @@ export default {
     },
     async newWorkspace() {
       const title = prompt('Workspace title');
+      if (title === null) return;
       if (!title) {
         return alert('Title cannot be empty');
       }
@@ -195,6 +196,7 @@ export default {
     },
     async createBoard() {
       const title = prompt('Board title');
+      if (title === null) return;
       if (!title) return alert('Title cannot be empty');
       const body = {title, workspace: this.currentWorkspace.uid};
       const res = await this.request('/boards', {method: 'POST', body})

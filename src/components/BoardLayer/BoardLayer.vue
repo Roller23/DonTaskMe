@@ -9,10 +9,11 @@
 			/>
 			<div class="list-button" @click.stop="newList"></div>
 		</div>
-		<h1>{{currentBoard.title}}</h1>
+		<h1>{{ currentBoard.title }}</h1>
 		<div class="list-wrap">
 			<draggable
 				class="listContainer"
+				ghost-class="border-ghost"
 				:list="lists"
 				:group="{ name: 'lists' }"
 				item-key="uid"
@@ -20,7 +21,10 @@
 				:component-data="{ tag: 'div', name: 'flip-list' }"
 			>
 				<template #item="list">
-					<div class="list" :class="{ taskHovered: hoveredTask }">
+					<div
+						class="list"
+						@mouseleave="showListOptions(list.element, true)"
+					>
 						<div class="list-header">
 							<div class="list-title">
 								{{ list.element.title }}
@@ -31,7 +35,7 @@
 							>
 								<img
 									src="@/assets/ellipsis.png"
-									alt="More board options"
+									alt="More list options"
 								/>
 								<div
 									v-if="list.element.optionsOpen"
@@ -52,13 +56,9 @@
 								</div>
 							</div>
 						</div>
-						<div
-							class="taskContainer"
-							@mouseover="hoveredTask = true"
-							@mouseleave="hoveredTask = false"
-						>
+						<div class="task-container">
 							<draggable
-								class="taskContainer"
+								class="task-container"
 								:list="list.element.tasks"
 								:group="{ name: 'tasks' }"
 								item-key="uid"
@@ -78,13 +78,17 @@
 												src="@/assets/edit.png"
 												alt="Edit button"
 												class="button"
-												@click="editTask(index, task)"
+												@click="
+													editTask(list.index, task)
+												"
 											/>
 											<img
 												src="@/assets/delete.png"
 												alt="Delete button"
 												class="button"
-												@click="deleteTask(index, task)"
+												@click="
+													deleteTask(list.index, task)
+												"
 											/>
 										</div>
 									</div>
@@ -135,7 +139,6 @@ export default {
 				new List("InProgress", 2, "inProgress1", "inProgress2"),
 				new List("Completed", 3),
 			],
-			hoveredTask: false,
 			currentBoard: null,
 		};
 	},
@@ -184,8 +187,13 @@ export default {
 				return;
 			this.lists[listId].tasks.splice(task.index, 1);
 		},
-		showListOptions(selectedList) {
-			console.log(selectedList);
+		showListOptions(selectedList, hide) {
+			if (hide) {
+				for (const list of this.lists) {
+					list.optionsOpen = false;
+				}
+				return;
+			}
 			if (!selectedList.optionsOpen) {
 				for (const list of this.lists) {
 					list.optionsOpen = false;
@@ -213,19 +221,19 @@ export default {
 			this.lists.splice(listId, 1);
 		},
 		goBack() {
-			this.currentBoard = null
+			this.currentBoard = null;
 			this.listeners.showWorkspaces();
-		}
+		},
 	},
 	mounted() {
-    this.listeners.loadBoard = board => {
-			console.log(board)
+		this.listeners.loadBoard = (board) => {
+			console.log(board);
 			this.currentBoard = board;
-    }
-  },
-  beforeUnmount() {
-    this.listeners.loadBoard = () => {};
-  },
+		};
+	},
+	beforeUnmount() {
+		this.listeners.loadBoard = () => {};
+	},
 };
 </script>
 
@@ -237,6 +245,9 @@ export default {
 	width: 100%;
 	height: 100%;
 	background-color: rgb(233, 233, 233);
+	background-image: url("../../assets/bg11.jpg");
+	background-size: cover;
+	background-position: center top;
 	overflow-y: auto;
 	display: grid;
 	column-gap: 10px;
@@ -247,21 +258,49 @@ export default {
 		"side lists";
 }
 
+.layer h1 {
+	margin-left: 20px;
+	line-height: 57px;
+	color: white;
+}
+
 .side-wrap {
 	grid-area: side;
 	vertical-align: middle;
-	background-color: #2c3e50;
+	background-color: rgb(36, 36, 36);
+	display: grid;
+	column-gap: 10px;
+	grid-template-rows: 100px auto;
+	justify-items: center;
 }
 
 .side-wrap .go-back {
-	display: inline-block;
 	width: 40px;
+	cursor: pointer;
+	filter: invert(100%);
+	align-self: center;
+}
+
+.list-button {
+	background-image: url(../../assets/add.png);
+	background-color: white;
+	background-size: 25px;
+	width: 75px;
+	height: 50px;
+	background-repeat: no-repeat;
+	background-position: center center;
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: 5px;
+}
+
+.list-button:hover {
+	border: 2px solid #56af9f;
 	cursor: pointer;
 }
 
 .list-wrap {
-	display: flex;
-	align-items: flex-start;
+	overflow-x: hidden;
 }
 
 .listContainer {
@@ -270,8 +309,7 @@ export default {
 	padding-right: 50px;
 	flex-wrap: nowrap;
 	overflow-x: auto;
-	justify-content: flex-start;
-	align-items: flex-start;
+	height: 100%;
 }
 
 .list {
@@ -285,21 +323,13 @@ export default {
 }
 
 .list:hover {
-	border: 2px solid #56af9f;
-	background-color: rgb(243, 243, 243);
 	cursor: grab;
 }
 
-.list:hover.taskHovered {
-	background-color: transparent;
-	border: 0;
-	cursor: default;
-}
-
-.taskContainer {
+.task-container {
 	display: flex;
 	flex-direction: column;
-	padding-bottom: 10px;
+	padding-bottom: 25px;
 }
 
 .list-title {
@@ -309,25 +339,56 @@ export default {
 	font-size: 1.2em;
 	font-weight: 900;
 	margin-bottom: 10px;
+	color: white;
+}
+
+.list-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .list-header .more {
-	display: none;
+	visibility: hidden;
+	align-self: flex-start;
+	margin-top: 15px;
 }
 
 .list-header .more img {
 	width: 15px;
 }
 
-.list-header:hover .more {
-	display: inline-block;
+.list:hover .list-header .more {
+	visibility: visible;
 	cursor: pointer;
+	position: relative;
 }
 
 .list-header .more .options {
 	background-color: white;
 	border-radius: 5px;
 	box-shadow: 1px 1px 3px rgb(195, 195, 195);
+	position: absolute;
+	top: 10px;
+	left: 120%;
+	padding: 10px;
+}
+
+.options .delete {
+	padding: 5px;
+	color: red;
+}
+.options .delete:hover {
+	color: white;
+	background-color: red;
+}
+.options .edit {
+	padding: 5px;
+	color: #56af9f;
+}
+.options .edit:hover {
+	color: white;
+	background-color: #56af9f;
 }
 
 .flip-list-move {
@@ -345,14 +406,15 @@ export default {
 
 .task:hover {
 	cursor: grab;
+	background-color: rgb(243, 243, 243);
 }
 
 .task:hover .buttons {
-	display: block;
+	visibility: visible;
 }
 
 .buttons {
-	display: none;
+	visibility: hidden;
 	min-width: 30px;
 }
 
@@ -382,16 +444,8 @@ export default {
 	cursor: pointer;
 }
 
-.list-button {
-	background-image: url(../../assets/add.png);
-	background-color: white;
-	background-size: 25px;
-	width: 50px;
-	height: 50px;
-	background-repeat: no-repeat;
-	background-position: center center;
-	margin-left: auto;
-	margin-right: auto;
-	border-radius: 5px;
+.border-ghost {
+	border: 2px solid #56af9f;
+	background-color: rgb(243, 243, 243);
 }
 </style>

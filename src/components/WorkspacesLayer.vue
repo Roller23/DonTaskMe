@@ -13,9 +13,9 @@
               @click="workspaceSelect(workspace)">
             <div class="buttons">
               <img src="@/assets/edit.png" alt="Edit button" class="button"
-              @click="editWorkspace($event, workspace)">
+              @click.stop="editWorkspace(workspace)">
               <img src="@/assets/delete.png" alt="Delete button" class="button"
-              @click="deleteWorkspace($event, workspace)">
+              @click.stop="deleteWorkspace(workspace)">
             </div>
             <h2 class="title">{{workspace.title}}</h2>
             <p class="desc">{{workspace.desc}}</p>
@@ -41,11 +41,11 @@
                 v-bind:key="board.title" :class="{visible: board.visible, 'new-board': board.newBoard}"
                 @click="board.newBoard ? createBoard() : enterBoard(board)">
               <h2 class="title">{{board.title}}</h2>
-              <div class="more" @click="showBoardOptions($event, board)" v-if="!board.newBoard">
+              <div class="more" @click.stop="showBoardOptions(board)" v-if="!board.newBoard">
                 <img src="@/assets/ellipsis.png" alt="More board options">
                 <div class="options" :class="{visible: board.optionsOpen}">
                   <div class="option edit">Edit</div>
-                  <div class="option delete" @click="deleteBoard($event, board)">Delete</div>
+                  <div class="option delete" @click.stop="deleteBoard(board)">Delete</div>
                 </div>
               </div>
             </div>
@@ -136,8 +136,7 @@ export default {
       if (this.currentWorkspace === null) return;
       this.hideBoards();
     },
-    showBoardOptions(event, selectedBoard) {
-      event.stopPropagation();
+    showBoardOptions(selectedBoard) {
       if (this.currentBoardOptions === selectedBoard) {
         this.currentBoardOptions.optionsOpen = false;
         this.currentBoardOptions = null;
@@ -149,8 +148,7 @@ export default {
       selectedBoard.optionsOpen = true;
       this.currentBoardOptions = selectedBoard;
     },
-    async deleteBoard(event, selectedBoard) {
-      event.stopPropagation();
+    async deleteBoard(selectedBoard) {
       if (!confirm(`Are you sure you want to delete ${selectedBoard.title}?`)) return;
       const res = await this.request(`/boards/${this.currentWorkspace.uid}/${selectedBoard.uid}`, {method: 'DELETE'})
       if (res.status === 202) {
@@ -215,16 +213,14 @@ export default {
       this.visible = false;
       this.listeners.loadBoard(board);
     },
-    editWorkspace(event, workspace) {
-      event.stopPropagation();
+    editWorkspace(workspace) {
       console.log(workspace);
       const title = prompt('New title');
       const desc = prompt('New description');
       const data = {title, desc};
       return data;
     },
-    async deleteWorkspace(event, workspace) {
-      event.stopPropagation();
+    async deleteWorkspace(workspace) {
       console.log(workspace);
       if (!confirm(`Are you sure you want to delete ${workspace.title} and all of its boards?`)) return;
       const res = await this.request(`/workspaces/${workspace.uid}`, {method: 'DELETE'})

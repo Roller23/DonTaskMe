@@ -1,11 +1,11 @@
 <template>
   <div class="layer">
-    <div class="back-wrap" :class="{visible: currentWorkspace !== null}" @click="hideBoards">
-      <img src="@/assets/go-back-arrow.png" alt="Go back" class="go-back">
-    </div>
-    <h1 class="top-text">{{workspacesText}}</h1>
     <div class="boxes-wrap">
       <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
+        <div class="back-wrap" :class="{visible: currentWorkspace !== null}" @click="hideBoards">
+          <img src="@/assets/go-back-arrow.png" alt="Go back" class="go-back">
+        </div>
+        <h1 class="top-text">Your workspaces</h1>
         <div v-for="workspace in workspaces"
             v-bind:key="workspace.title" class="workspace-wrap workspace"
             :class="{hidden: workspace.hidden, selected: currentWorkspace === workspace}"
@@ -30,7 +30,10 @@
           </div>
         </transition>
         <transition name="fade">
-          <h1 v-if="currentWorkspace !== null">Boards in this workspace</h1>
+          <h1 v-if="currentWorkspace !== null">
+            Boards in
+            <span class="curr-workspace-title">{{currentWorkspace.title}}</span>
+          </h1>
         </transition>
         <div class="boards-wrap" v-if="currentWorkspace !== null">
           <div class="board" v-for="board in currentWorkspace.boards"
@@ -97,7 +100,6 @@ export default {
       workspaces: [],
       currentWorkspace: null,
       currentBoardOptions: null,
-      workspacesText: 'Your workspaces'
     }
   },
   methods: {
@@ -106,7 +108,6 @@ export default {
         workspace.hidden = false;
         for (const board of workspace.boards) board.visible = false;
       }
-      this.workspacesText = 'Your workspaces';
       this.currentWorkspace = null;
     },
     workspaceSelect(selectedWorkspace) {
@@ -114,7 +115,6 @@ export default {
       if (selectedWorkspace === this.currentWorkspace) {
         return this.hideBoards();
       }
-      this.workspacesText = selectedWorkspace.title;
       this.currentWorkspace = selectedWorkspace
       for (const workspace of this.workspaces) {
         workspace.hidden = workspace !== selectedWorkspace;
@@ -247,17 +247,17 @@ export default {
   width: 100%;
   height: 100%;
   background-color: rgb(233, 233, 233);
-  padding: 20px;
   padding-bottom: 0px;
 }
 .back-wrap {
   width: 0px;
-  display: inline-block;
   margin-right: 0px;
   overflow: hidden;
   vertical-align: middle;
   transform: translateY(-5px);
   transition: 0.3s;
+  float: right;
+  filter: invert(100%);
 }
 .back-wrap.visible {
   width: 40px;
@@ -270,10 +270,12 @@ export default {
 .top-text {
   height: 50px;
   margin: 0px;
+  margin-bottom: 10px;
   display: inline-block;
+  color: white;
 }
 .boxes-wrap {
-  height: calc(100% - 50px);
+  height: 100%;
   white-space: nowrap;
 }
 .workspaces {
@@ -283,11 +285,14 @@ export default {
   padding-right: 5px;
   transition: 0.6s;
   display: inline-block;
+  background-color: rgb(36, 36, 36);
+  padding: 30px;
 }
 .workspaces.hidden {
   transform: translateX(-60%);
 }
 .boards {
+  background-color: rgb(243, 243, 243);
   color: black;
   display: inline-block;
   vertical-align: top;
@@ -315,7 +320,7 @@ export default {
   min-height: 100px;
   min-width: 200px;
   background-color: white;
-  border-radius: 5px;
+  border-radius: 20px;
   cursor: pointer;
   position: relative;
   vertical-align: top;
@@ -339,8 +344,8 @@ export default {
 }
 .boards .board .more {
   position: absolute;
-  bottom: 0px;
-  left: 15px;
+  bottom: 5px;
+  left: 20px;
   display: block;
   cursor: pointer;
 }
@@ -382,6 +387,9 @@ export default {
   color: white;
   background-color: #56AF9F;
 }
+.boards .curr-workspace-title {
+  color: #56AF9F;
+}
 .choose-workspace {
   position: absolute;
   left: 50%;
@@ -421,20 +429,20 @@ export default {
 .workspace-wrap {
   cursor: pointer;
   padding: 10px 20px;
-  background-color: white;
-  box-shadow: 1px 1px 1px 1px rgb(216, 216, 216);
-  margin-bottom: 10px;
-  border-radius: 3px;
+  background-color: rgb(238, 238, 238);
+  margin-bottom: 15px;
+  border-radius: 25px;
   transition: 0.3s;
   text-align: right;
-  border: 2px solid white;
+  border: 4px solid rgb(238, 238, 238);
   position: relative;
 }
 .workspace-wrap.hidden {
   transform: translateX(-10%);
 }
 .workspace-wrap:not(.selected):hover {
-  border: 2px solid #56AF9F;
+  border: 4px solid #56AF9F;
+  transform: translateX(5px);
 }
 
 .workspace-wrap.selected {

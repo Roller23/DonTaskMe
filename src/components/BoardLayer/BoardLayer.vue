@@ -84,7 +84,7 @@
 												src="@/assets/delete.png"
 												alt="Delete button"
 												class="button"
-												@click="deleteTask(index, task)"
+												@click="deleteTask(list.element, task)"
 											/>
 										</div>
 									</div>
@@ -93,7 +93,7 @@
 						</div>
 						<div
 							class="task-button"
-							@click.stop="createTask(list.index)"
+							@click.stop="createTask(list.element)"
 						></div>
 					</div>
 				</template>
@@ -129,12 +129,7 @@ export default {
 	components: { draggable },
 	data() {
 		return {
-			lists: [
-				new List("Ideas", 0, "Idea1"),
-				new List("Todo", 1, "Todo1", "Todo2"),
-				new List("InProgress", 2, "inProgress1", "inProgress2"),
-				new List("Completed", 3),
-			],
+			lists: [],
 			hoveredTask: false,
 			currentBoard: null,
 		};
@@ -155,10 +150,10 @@ export default {
 				const list = new List(json.title, json.index);
 				this.lists.push(list);
 			} else {
-				alert('Could not the list')
+				alert('Could not add the list')
 			}
 		},
-		createTask(listId) {
+		async createTask(list) {
 			const title = prompt("Task title");
 			if (title === "") {
 				return alert("Title cannot be empty");
@@ -166,7 +161,15 @@ export default {
 			if (title === null) {
 				return;
 			}
-			this.lists[listId].addTasks(title);
+			const body = {title, index: 0, listUid: list.uid};
+			const res = await this.request('/cards', {method: 'POST', body})
+			if (res.status === 201) {
+				const json = await res.json();
+				console.log(json)
+				list.addTasks(json.title);
+			} else {
+				alert('Could not add the task');
+			}
 		},
 		editTask(listId, task) {
 			const title = prompt("New task title", task.element.title);
@@ -178,14 +181,9 @@ export default {
 			}
 			this.lists[listId].tasks[task.index].title = title;
 		},
-		deleteTask(listId, task) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${task.element.title}?`
-				)
-			)
-				return;
-			this.lists[listId].tasks.splice(task.index, 1);
+		deleteTask(list, task) {
+			if (!confirm(`Are you sure you want to delete ${task.element.title}?`)) return;
+			list.tasks.splice(task.index, 1);
 		},
 		showListOptions(selectedList) {
 			console.log(selectedList);
@@ -221,9 +219,24 @@ export default {
 		}
 	},
 	mounted() {
-    this.listeners.loadBoard = board => {
+    this.listeners.loadBoard = async board => {
 			console.log(board)
 			this.currentBoard = board;
+			const res = await this.request(`/lists/${this.currentBoard.uid}`)
+			if (res.status === 200) {
+				const lists = await res.json();
+				console.log(lists)
+				for (const list of lists) {
+					const newList = new List(list.title, list.uid);
+					for (const card of (list.cards || [])) {
+						newList.addTasks(card.title)
+					}
+					this.lists.push(newList)
+				}
+			} else {
+				alert('Could not load the board')
+				window.location.reload();
+			}
     }
   },
   beforeUnmount() {

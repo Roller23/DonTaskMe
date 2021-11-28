@@ -148,12 +148,15 @@ export default {
 			if (title === null) {
 				return;
 			}
-			// const res = await fetch(`${this.backendUrl}/`, {
-			// 	method: "POST",
-			// 	headers: { "Content-Type": "application/json" },
-			// 	body: JSON.stringify(body),
-			// });
-			this.lists.push(new List(title, this.lists.length));
+			const body = {title, index: this.lists.length};
+			const res = await this.request(`/lists/${this.currentBoard.uid}`, {method: 'POST', body})
+			if (res.status === 201) {
+				const json = await res.json();
+				const list = new List(json.title, json.index);
+				this.lists.push(list);
+			} else {
+				alert('Could not the list')
+			}
 		},
 		createTask(listId) {
 			const title = prompt("Task title");

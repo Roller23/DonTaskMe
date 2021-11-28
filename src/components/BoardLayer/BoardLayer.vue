@@ -16,12 +16,14 @@
 				:group="{ name: 'lists' }"
 				item-key="uid"
 				tag="transition-group"
-				:component-data="{ tag: 'div', name: 'fade' }"
+				:component-data="{ tag: 'div', name: 'flip-list' }"
 			>
 				<template #item="list">
 					<div class="list" :class="{ taskHovered: hoveredTask }">
-						<div class="list-title">
-							{{ list.element.title }}
+						<div class="list-header">
+							<div class="list-title">
+								{{ list.element.title }}
+							</div>
 							<div
 								class="more"
 								@click="showListOptions(list.element)"
@@ -60,7 +62,10 @@
 								:group="{ name: 'tasks' }"
 								item-key="uid"
 								tag="transition-group"
-								:component-data="{ tag: 'div', name: 'fade' }"
+								:component-data="{
+									tag: 'div',
+									name: 'flip-list',
+								}"
 							>
 								<template #item="task">
 									<div class="task">
@@ -283,6 +288,7 @@ export default {
 }
 
 .list-title {
+	display: inline-block;
 	border-radius: 10px;
 	padding: 10px;
 	font-size: 1.2em;
@@ -290,20 +296,20 @@ export default {
 	margin-bottom: 10px;
 }
 
-.list-title .more {
-	/* display: none; */
+.list-header .more {
+	display: none;
 }
 
-.list-title .more img {
+.list-header .more img {
 	width: 15px;
 }
 
-.list-title:hover .more {
-	display: block;
+.list-header:hover .more {
+	display: inline-block;
 	cursor: pointer;
 }
 
-.list-title .more .options {
+.list-header .more .options {
 	background-color: white;
 	border-radius: 5px;
 	box-shadow: 1px 1px 3px rgb(195, 195, 195);

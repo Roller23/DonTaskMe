@@ -151,9 +151,7 @@ export default {
       this.currentWorkspace.removeBoard(selectedBoard)
     },
     async getWorkspaces() {
-      const url = new URL(`${this.backendUrl}/workspaces`);
-      url.searchParams.append('token', localStorage.token)
-      const res = await fetch(url, {method: 'GET'});
+      const res = await this.request('/workspaces', {query: {}});
       if (res.status === 200) {
         const json = await res.json();
         console.log(json)
@@ -176,10 +174,7 @@ export default {
         return alert('Title cannot be empty');
       }
       const desc = prompt('Workspace description');
-      const body = {title, desc, token: localStorage.token};
-      const res = await fetch(`${this.backendUrl}/workspaces`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-      });
+      const res = await this.request('/workspaces', {method: 'POST', body: {title, desc}})
       if (res.status === 201) {
         const json = await res.json();
         console.log(json)
@@ -211,9 +206,7 @@ export default {
       event.stopPropagation();
       console.log(workspace);
       if (!confirm(`Are you sure you want to delete ${workspace.title} and all of its boards?`)) return;
-      const res = await fetch(`${this.backendUrl}/workspaces/${workspace.uid}`, {
-        method: 'DELETE'
-      });
+      const res = await this.request(`/workspaces/${workspace.uid}`, {method: 'DELETE'})
       if (res.status === 202) {
         const index = this.workspaces.indexOf(workspace);
         if (index === -1) return;

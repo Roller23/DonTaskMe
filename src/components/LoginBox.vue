@@ -68,9 +68,7 @@ export default {
       if (!login) return alert(`Login can't be empty`)
       if (!password) return alert(`Password can't be empty`)
       const body = {username: login, password};
-      const res = await fetch(`${this.backendUrl}/login`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-      });
+      const res = await this.request('/login', {method: 'POST', body})
       if (res.status === 200) {
         const json = await res.json();
         localStorage.setItem('token', json.token)
@@ -94,9 +92,7 @@ export default {
       if (!password2) return alert(`Password can't be empty`)
       if (password1 !== password2) return alert(`Passwords must match`)
       const body = {username: login, password: password1};
-      const res = await fetch(`${this.backendUrl}/register`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-      });
+      const res = await this.request('/register', {method: 'POST', body})
       if (res.status === 201) {
         alert('Account created!');
       } else {

@@ -5,6 +5,7 @@
 				src="@/assets/go-back-arrow.png"
 				alt="Go back"
 				class="go-back"
+				@click="goBack"
 			/>
 			<div class="list-button" @click.stop="newList"></div>
 		</div>
@@ -211,6 +212,10 @@ export default {
 				return;
 			this.lists.splice(listId, 1);
 		},
+		goBack() {
+			this.currentBoard = null
+			this.listeners.showWorkspaces();
+		}
 	},
 	mounted() {
     this.listeners.loadBoard = board => {

@@ -243,10 +243,14 @@ export default {
     this.listeners.loadWorkspaces = () => {
       this.getWorkspaces();
     }
+    this.listeners.showWorkspaces = () => {
+      this.visible = true;
+    }
   },
   beforeUnmount() {
     document.removeEventListener('keyup', this.caputereKeyboard);
     this.listeners.loadWorkspaces = () => {};
+    this.listeners.showWorkspaces = () => {};
   },
 }
 </script>

@@ -185,7 +185,7 @@ export default {
 		},
 		async deleteTask(list, task) {
 			if (!confirm(`Are you sure you want to delete ${task.title}?`)) return;
-			const res = this.request(`/cards/${list.uid}/${task.uid}`, {method: 'DELETE'})
+			const res = await this.request(`/cards/${list.uid}/${task.uid}`, {method: 'DELETE'})
 			if (res.status === 202) {
 				list.tasks.splice(task.index, 1);
 			} else {

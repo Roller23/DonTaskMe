@@ -188,7 +188,8 @@ export default {
     async createBoard() {
       const title = prompt('Board title');
       if (!title) return alert('Title cannot be empty');
-      const res = await this.request('/boards', {method: 'POST', body: {title}})
+      const body = {title, workspace: this.currentWorkspace.uid};
+      const res = await this.request('/boards', {method: 'POST', body})
       if (res.status === 201) {
         const json = await res.json();
         console.log(json)

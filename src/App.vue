@@ -1,7 +1,7 @@
 <template>
-	<WorkspacesLayer v-if="false"></WorkspacesLayer>
-	<LoginLayer v-if="false"></LoginLayer>
 	<BoardLayer></BoardLayer>
+	<WorkspacesLayer></WorkspacesLayer>
+	<LoginLayer v-if="!hasToken()"></LoginLayer>
 </template>
 
 <script>

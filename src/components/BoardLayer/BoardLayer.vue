@@ -1,5 +1,5 @@
 <template>
-	<div class="layer">
+	<div class="layer" v-if="currentBoard != null">
 		<div class="side-wrap">
 			<img
 				src="@/assets/go-back-arrow.png"
@@ -8,7 +8,7 @@
 			/>
 			<div class="list-button" @click.stop="newList"></div>
 		</div>
-		<h1>The board lol</h1>
+		<h1>{{currentBoard.title}}</h1>
 		<div class="list-wrap">
 			<draggable
 				class="listContainer"
@@ -135,6 +135,7 @@ export default {
 				new List("Completed", 3),
 			],
 			hoveredTask: false,
+			currentBoard: null,
 		};
 	},
 	methods: {
@@ -211,6 +212,15 @@ export default {
 			this.lists.splice(listId, 1);
 		},
 	},
+	mounted() {
+    this.listeners.loadBoard = board => {
+			console.log(board)
+			this.currentBoard = board;
+    }
+  },
+  beforeUnmount() {
+    this.listeners.loadBoard = () => {};
+  },
 };
 </script>
 

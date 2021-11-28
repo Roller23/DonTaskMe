@@ -1,57 +1,59 @@
 <template>
-  <div class="layer">
-    <div class="boxes-wrap">
-      <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
-        <div class="back-wrap" :class="{visible: currentWorkspace !== null}" @click="hideBoards">
-          <img src="@/assets/go-back-arrow.png" alt="Go back" class="go-back">
-        </div>
-        <h1 class="top-text">Your workspaces</h1>
-        <div v-for="workspace in workspaces"
-            v-bind:key="workspace.title" class="workspace-wrap workspace"
-            :class="{hidden: workspace.hidden, selected: currentWorkspace === workspace}"
-            @click="workspaceSelect(workspace)">
-          <div class="buttons">
-            <img src="@/assets/edit.png" alt="Edit button" class="button"
-            @click="editWorkspace($event, workspace)">
-            <img src="@/assets/delete.png" alt="Delete button" class="button"
-            @click="deleteWorkspace($event, workspace)">
+  <transition name="fade">
+    <div class="layer" v-if="visible">
+      <div class="boxes-wrap">
+        <div class="workspaces" :class="{hidden: currentWorkspace !== null}">
+          <div class="back-wrap" :class="{visible: currentWorkspace !== null}" @click="hideBoards">
+            <img src="@/assets/go-back-arrow.png" alt="Go back" class="go-back">
           </div>
-          <h2 class="title">{{workspace.title}}</h2>
-          <p class="desc">{{workspace.desc}}</p>
-        </div>
-      </div>
-      <div class="boards" :class="{expanded: currentWorkspace !== null}">
-        <transition name="fade">
-          <div class="choose-workspace" v-if="currentWorkspace === null">
-            <img class="icon" src="@/assets/workspace.png" alt="Workspace icon">
-            <h2 class="text">Choose a workspace to see its boards</h2>
-            <p class="text">or</p>
-            <h2 class="text new-workspace" @click="newWorkspace">Create a new one</h2>
+          <h1 class="top-text">Your workspaces</h1>
+          <div v-for="workspace in workspaces"
+              v-bind:key="workspace.title" class="workspace-wrap workspace"
+              :class="{hidden: workspace.hidden, selected: currentWorkspace === workspace}"
+              @click="workspaceSelect(workspace)">
+            <div class="buttons">
+              <img src="@/assets/edit.png" alt="Edit button" class="button"
+              @click="editWorkspace($event, workspace)">
+              <img src="@/assets/delete.png" alt="Delete button" class="button"
+              @click="deleteWorkspace($event, workspace)">
+            </div>
+            <h2 class="title">{{workspace.title}}</h2>
+            <p class="desc">{{workspace.desc}}</p>
           </div>
-        </transition>
-        <transition name="fade">
-          <h1 v-if="currentWorkspace !== null">
-            Boards in
-            <span class="curr-workspace-title">{{currentWorkspace.title}}</span>
-          </h1>
-        </transition>
-        <div class="boards-wrap" v-if="currentWorkspace !== null">
-          <div class="board" v-for="board in currentWorkspace.boards"
-               v-bind:key="board.title" :class="{visible: board.visible, 'new-board': board.newBoard}"
-               @click="board.newBoard ? createBoard() : enterBoard(board)">
-            <h2 class="title">{{board.title}}</h2>
-            <div class="more" @click="showBoardOptions($event, board)" v-if="!board.newBoard">
-              <img src="@/assets/ellipsis.png" alt="More board options">
-              <div class="options" :class="{visible: board.optionsOpen}">
-                <div class="option edit">Edit</div>
-                <div class="option delete" @click="deleteBoard($event, board)">Delete</div>
+        </div>
+        <div class="boards" :class="{expanded: currentWorkspace !== null}">
+          <transition name="fade">
+            <div class="choose-workspace" v-if="currentWorkspace === null">
+              <img class="icon" src="@/assets/workspace.png" alt="Workspace icon">
+              <h2 class="text">Choose a workspace to see its boards</h2>
+              <p class="text">or</p>
+              <h2 class="text new-workspace" @click="newWorkspace">Create a new one</h2>
+            </div>
+          </transition>
+          <transition name="fade">
+            <h1 v-if="currentWorkspace !== null">
+              Boards in
+              <span class="curr-workspace-title">{{currentWorkspace.title}}</span>
+            </h1>
+          </transition>
+          <div class="boards-wrap" v-if="currentWorkspace !== null">
+            <div class="board" v-for="board in currentWorkspace.boards"
+                v-bind:key="board.title" :class="{visible: board.visible, 'new-board': board.newBoard}"
+                @click="board.newBoard ? createBoard() : enterBoard(board)">
+              <h2 class="title">{{board.title}}</h2>
+              <div class="more" @click="showBoardOptions($event, board)" v-if="!board.newBoard">
+                <img src="@/assets/ellipsis.png" alt="More board options">
+                <div class="options" :class="{visible: board.optionsOpen}">
+                  <div class="option edit">Edit</div>
+                  <div class="option delete" @click="deleteBoard($event, board)">Delete</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -100,6 +102,7 @@ export default {
       workspaces: [],
       currentWorkspace: null,
       currentBoardOptions: null,
+      visible: true
     }
   },
   methods: {
@@ -207,6 +210,8 @@ export default {
     },
     enterBoard(board) {
       console.log(board)
+      this.visible = false;
+      this.listeners.loadBoard(board);
     },
     editWorkspace(event, workspace) {
       event.stopPropagation();
@@ -474,6 +479,7 @@ export default {
 .workspace-wrap .buttons .button:first-child {
   margin-right: 25px;
 }
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }

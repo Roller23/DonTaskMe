@@ -22,7 +22,6 @@ app.config.globalProperties.request = async (route, {method = 'GET', body = null
   if (!url.searchParams.has('token') && localStorage.token) {
     url.searchParams.append('token', localStorage.token)
   }
-  const res = await fetch(url, options);
-  return res;
+  return await fetch(url, options);
 }
 app.mount('#app')

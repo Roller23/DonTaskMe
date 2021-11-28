@@ -4,7 +4,7 @@ import App from './App.vue'
 const app = createApp(App)
 app.config.globalProperties.backendUrl = 'https://don-task-me.herokuapp.com';
 app.config.globalProperties.listeners = {};
-app.config.globalProperties.request = async (route, {method = 'GET', body = null, query = null}) => {
+app.config.globalProperties.request = async (route, {method = 'GET', body = null, query = null} = {}) => {
   const options = {method}
   if (body && typeof body === 'object') {
     options.headers = {'Content-Type': 'application/json'}

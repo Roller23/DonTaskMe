@@ -40,11 +40,11 @@
                v-bind:key="board.title" :class="{visible: board.visible, 'new-board': board.newBoard}"
                @click="board.newBoard ? createBoard() : enterBoard(board)">
             <h2 class="title">{{board.title}}</h2>
-            <div class="more" @click="showBoardOptions(board)" v-if="!board.newBoard">
+            <div class="more" @click="showBoardOptions($event, board)" v-if="!board.newBoard">
               <img src="@/assets/ellipsis.png" alt="More board options">
               <div class="options" :class="{visible: board.optionsOpen}">
                 <div class="option edit">Edit</div>
-                <div class="option delete" @click="deleteBoard(board)">Delete</div>
+                <div class="option delete" @click="deleteBoard($event, board)">Delete</div>
               </div>
             </div>
           </div>
@@ -133,7 +133,8 @@ export default {
       if (this.currentWorkspace === null) return;
       this.hideBoards();
     },
-    showBoardOptions(selectedBoard) {
+    showBoardOptions(event, selectedBoard) {
+      event.stopPropagation();
       if (this.currentBoardOptions === selectedBoard) {
         this.currentBoardOptions.optionsOpen = false;
         this.currentBoardOptions = null;
@@ -145,13 +146,18 @@ export default {
       selectedBoard.optionsOpen = true;
       this.currentBoardOptions = selectedBoard;
     },
-    deleteBoard(selectedBoard) {
+    async deleteBoard(event, selectedBoard) {
+      event.stopPropagation();
       if (!confirm(`Are you sure you want to delete ${selectedBoard.title}?`)) return;
-      // TODO: delete it on the backend
-      this.currentWorkspace.removeBoard(selectedBoard)
+      const res = await this.request(`/boards/${this.currentWorkspace.uid}/${selectedBoard.uid}`, {method: 'DELETE'})
+      if (res.status === 202) {
+        this.currentWorkspace.removeBoard(selectedBoard)
+      } else {
+        alert('Could not delete the board');
+      }
     },
     async getWorkspaces() {
-      const res = await this.request('/workspaces', {query: {}});
+      const res = await this.request('/workspaces');
       if (res.status === 200) {
         const json = await res.json();
         console.log(json)
@@ -192,7 +198,7 @@ export default {
       if (res.status === 201) {
         const json = await res.json();
         console.log(json)
-        const board = new Board(json.title);
+        const board = new Board(json.title, json.uid);
         board.visible = true;
         this.currentWorkspace.boards.push(board)
       } else {

@@ -84,7 +84,7 @@
 												src="@/assets/delete.png"
 												alt="Delete button"
 												class="button"
-												@click="deleteTask(list.element, task)"
+												@click="deleteTask(list.element, task.element)"
 											/>
 										</div>
 									</div>
@@ -105,6 +105,13 @@
 <script>
 import draggable from "vuedraggable";
 
+class Task {
+	constructor(title, uid) {
+		this.title = title;
+		this.uid = uid
+	}
+}
+
 class List {
 	constructor(title, uid, ...tasks) {
 		this.title = title;
@@ -114,12 +121,7 @@ class List {
 		this.optionsOpen = false;
 	}
 	addTasks(...tasks) {
-		let counter = this.tasks.length;
-		const newTasks = tasks.map((t, idx) => ({
-			title: t,
-			uid: counter + idx,
-		}));
-		this.tasks.push(...newTasks);
+		this.tasks.push(...tasks);
 		return this;
 	}
 }
@@ -166,7 +168,7 @@ export default {
 			if (res.status === 201) {
 				const json = await res.json();
 				console.log(json)
-				list.addTasks(json.title);
+				list.addTasks(new Task(json.title, json.uid));
 			} else {
 				alert('Could not add the task');
 			}
@@ -181,9 +183,14 @@ export default {
 			}
 			this.lists[listId].tasks[task.index].title = title;
 		},
-		deleteTask(list, task) {
-			if (!confirm(`Are you sure you want to delete ${task.element.title}?`)) return;
-			list.tasks.splice(task.index, 1);
+		async deleteTask(list, task) {
+			if (!confirm(`Are you sure you want to delete ${task.title}?`)) return;
+			const res = this.request(`/cards/${list.uid}/${task.uid}`, {method: 'DELETE'})
+			if (res.status === 202) {
+				list.tasks.splice(task.index, 1);
+			} else {
+				alert('Could not delete the task')
+			}
 		},
 		showListOptions(selectedList) {
 			console.log(selectedList);
@@ -229,7 +236,7 @@ export default {
 				for (const list of lists) {
 					const newList = new List(list.title, list.uid);
 					for (const card of (list.cards || [])) {
-						newList.addTasks(card.title)
+						newList.addTasks(new Task(card.title, card.uid))
 					}
 					this.lists.push(newList)
 				}

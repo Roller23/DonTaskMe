@@ -185,11 +185,20 @@ export default {
         console.log('Could not add the workspace');
       }
     },
-    createBoard() {
+    async createBoard() {
       const title = prompt('Board title');
-      const board = new Board(title);
-      board.visible = true;
-      this.currentWorkspace.boards.push(board)
+      if (!title) return alert('Title cannot be empty');
+      const res = await this.request('/boards', {method: 'POST', body: {title}})
+      if (res.status === 201) {
+        const json = await res.json();
+        console.log(json)
+        alert('Board created');
+        const board = new Board(json.title);
+        board.visible = true;
+        this.currentWorkspace.boards.push(board)
+      } else {
+        console.log('Could not add the board');
+      }
     },
     enterBoard(board) {
       console.log(board)

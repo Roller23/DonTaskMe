@@ -165,7 +165,9 @@ export default {
           this.workspaces.push(newWorkspace)
         }
       } else {
-        alert('Could not load workspaces');
+        localStorage.removeItem('token');
+        alert('Could not load workspaces, log in again');
+        window.location.reload();
       }
     },
     async newWorkspace() {

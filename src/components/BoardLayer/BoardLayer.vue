@@ -1,109 +1,119 @@
 <template>
-	<div class="layer" v-if="currentBoard != null">
-		<div class="side-wrap">
-			<img
-				src="@/assets/go-back-arrow.png"
-				alt="Go back"
-				class="go-back"
-				@click="goBack"
-			/>
-			<div class="list-button" @click.stop="newList"></div>
-		</div>
-		<h1>{{ currentBoard.title }}</h1>
-		<div class="list-wrap">
-			<draggable
-				class="listContainer"
-				ghost-class="border-ghost"
-				:list="lists"
-				:group="{ name: 'lists' }"
-				item-key="uid"
-				tag="transition-group"
-				:component-data="{ tag: 'div', name: 'flip-list' }"
-			>
-				<template #item="list">
-					<div
-						class="list"
-						@mouseleave="showListOptions(list.element, true)"
-					>
-						<div class="list-header">
-							<div class="list-title">
-								{{ list.element.title }}
-							</div>
-							<div
-								class="more"
-								@click="showListOptions(list.element)"
-							>
-								<img
-									src="@/assets/ellipsis.png"
-									alt="More list options"
-								/>
+	<transition name="fade" mode="out-in">
+		<div class="layer" v-if="currentBoard != null">
+			<div class="side-wrap">
+				<img
+					src="@/assets/go-back-arrow.png"
+					alt="Go back"
+					class="go-back"
+					@click="goBack"
+				/>
+				<div class="list-button" @click.stop="newList"></div>
+			</div>
+			<h1>{{ currentBoard.title }}</h1>
+			<div class="list-wrap">
+				<draggable
+					class="listContainer"
+					ghost-class="border-ghost"
+					:list="lists"
+					:group="{ name: 'lists' }"
+					item-key="uid"
+					tag="transition-group"
+					:component-data="{ tag: 'div', name: 'flip-list' }"
+				>
+					<template #item="list">
+						<div
+							class="list"
+							@mouseleave="showListOptions(list.element, true)"
+						>
+							<div class="list-header">
+								<div class="list-title">
+									{{ list.element.title }}
+								</div>
 								<div
-									v-if="list.element.optionsOpen"
-									class="options"
+									class="more"
+									@click="showListOptions(list.element)"
 								>
+									<img
+										src="@/assets/ellipsis.png"
+										alt="More list options"
+									/>
 									<div
-										class="option edit"
-										@click="editList(list.index, list)"
+										v-if="list.element.optionsOpen"
+										class="options"
 									>
-										Edit
-									</div>
-									<div
-										class="option delete"
-										@click="deleteList(list.index, list)"
-									>
-										Delete
+										<div
+											class="option edit"
+											@click="editList(list.index, list)"
+										>
+											Edit
+										</div>
+										<div
+											class="option delete"
+											@click="
+												deleteList(list.index, list)
+											"
+										>
+											Delete
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="task-container">
-							<draggable
-								class="task-container"
-								:list="list.element.tasks"
-								:group="{ name: 'tasks' }"
-								item-key="uid"
-								tag="transition-group"
-								:component-data="{
-									tag: 'div',
-									name: 'flip-list',
-								}"
-							>
-								<template #item="task">
-									<div class="task">
-										<div>
-											{{ task.element.title }}
+							<div class="task-container">
+								<draggable
+									class="task-container"
+									:list="list.element.tasks"
+									:group="{ name: 'tasks' }"
+									item-key="uid"
+									tag="transition-group"
+									:component-data="{
+										tag: 'div',
+										name: 'flip-list',
+									}"
+								>
+									<template #item="task">
+										<div class="task">
+											<div>
+												{{ task.element.title }}
+											</div>
+											<div class="buttons">
+												<img
+													src="@/assets/edit.png"
+													alt="Edit button"
+													class="button"
+													@click="
+														editTask(
+															list.index,
+															task
+														)
+													"
+												/>
+												<img
+													src="@/assets/delete.png"
+													alt="Delete button"
+													class="button"
+													@click="
+														deleteTask(
+															list.index,
+															task
+														)
+													"
+												/>
+											</div>
 										</div>
-										<div class="buttons">
-											<img
-												src="@/assets/edit.png"
-												alt="Edit button"
-												class="button"
-												@click="
-													editTask(list.index, task)
-												"
-											/>
-											<img
-												src="@/assets/delete.png"
-												alt="Delete button"
-												class="button"
-												@click="
-													deleteTask(list.index, task)
-												"
-											/>
-										</div>
-									</div>
-								</template>
-							</draggable>
+									</template>
+								</draggable>
+							</div>
+							<div
+								class="task-button"
+								@click.stop="createTask(list.index)"
+							></div>
 						</div>
-						<div
-							class="task-button"
-							@click.stop="createTask(list.index)"
-						></div>
-					</div>
-				</template>
-			</draggable>
+					</template>
+				</draggable>
+			</div>
 		</div>
-	</div>
+	</transition>
 </template>
 
 <script>
@@ -222,7 +232,7 @@ export default {
 		},
 		goBack() {
 			this.currentBoard = null;
-			this.listeners.showWorkspaces();
+			setTimeout(this.listeners.showWorkspaces, 500);
 		},
 	},
 	mounted() {
@@ -260,7 +270,7 @@ export default {
 
 .layer h1 {
 	margin-left: 20px;
-	line-height: 57px;
+	line-height: 58px;
 	color: white;
 }
 
@@ -356,6 +366,7 @@ export default {
 
 .list-header .more img {
 	width: 15px;
+	filter: invert(100%);
 }
 
 .list:hover .list-header .more {
@@ -422,6 +433,7 @@ export default {
 	cursor: pointer;
 	width: 15px;
 	opacity: 0.5;
+	margin-left: 5px;
 }
 
 .task-button {
@@ -445,7 +457,23 @@ export default {
 }
 
 .border-ghost {
-	border: 2px solid #56af9f;
-	background-color: rgb(243, 243, 243);
+	border: 2px dashed white;
+}
+
+.fade-leave-active {
+	animation: slide 1.5s;
+}
+.fade-leave-to {
+}
+
+@keyframes slide {
+	0% {
+	}
+	50% {
+		transform: translateX(50%) translateX(-35%);
+	}
+	100% {
+		opacity: 0;
+	}
 }
 </style>

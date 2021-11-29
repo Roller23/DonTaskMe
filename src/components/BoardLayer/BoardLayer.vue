@@ -167,7 +167,7 @@ export default {
 			});
 			if (res.status === 201) {
 				const json = await res.json();
-				const list = new List(json.title, json.index);
+				const list = new List(json.title, json.uid);
 				this.lists.push(list);
 			} else {
 				alert("Could not add the list");
@@ -202,8 +202,7 @@ export default {
 			this.lists[listId].tasks[task.index].title = title;
 		},
 		async deleteTask(list, task) {
-			if (!confirm(`Are you sure you want to delete ${task.title}?`))
-				return;
+			if (!confirm(`Are you sure you want to delete ${task.title}?`)) return;
 			const res = await this.request(`/cards/${list.uid}/${task.uid}`, {
 				method: "DELETE",
 			});
@@ -238,8 +237,7 @@ export default {
 			this.lists[listId].title = title;
 		},
 		async deleteList(listId, list) {
-			if (!confirm(`Are you sure you want to delete ${list.title}?`))
-				return;
+			if (!confirm(`Are you sure you want to delete ${list.title}?`)) return;
 			const res = await this.request(`/lists/${list.uid}`, {
 				method: "DELETE",
 			});

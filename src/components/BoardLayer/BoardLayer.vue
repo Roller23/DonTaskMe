@@ -207,7 +207,10 @@ export default {
 				method: "DELETE",
 			});
 			if (res.status === 202) {
-				list.tasks.splice(task.index, 1);
+				const index = list.tasks.indexOf(task);
+				if (index !== -1) {
+					list.tasks.splice(index, 1);
+				}
 			} else {
 				alert("Could not delete the task");
 			}
@@ -242,7 +245,10 @@ export default {
 				method: "DELETE",
 			});
 			if (res.status === 202) {
-				this.lists.splice(listId, 1);
+				const index = this.lists.indexOf(list);
+				if (index !== -1) {
+					this.lists.splice(index, 1);
+				}
 			} else {
 				alert("Could not delete the list");
 			}

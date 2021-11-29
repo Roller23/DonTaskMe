@@ -262,6 +262,7 @@ export default {
 		this.listeners.loadBoard = async (board) => {
 			console.log(board);
 			this.currentBoard = board;
+			this.lists.splice(0); // clear the array to remove leftover lists
 			const res = await this.request(`/lists/${this.currentBoard.uid}`);
 			if (res.status === 200) {
 				const lists = await res.json();

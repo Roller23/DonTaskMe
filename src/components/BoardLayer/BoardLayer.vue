@@ -45,7 +45,7 @@
 									</div>
 									<div
 										class="option delete"
-										@click="deleteList(list.index, list)"
+										@click="deleteList(list.index, list.element)"
 									>
 										Delete
 									</div>
@@ -84,7 +84,7 @@
 												src="@/assets/delete.png"
 												alt="Delete button"
 												class="button"
-												@click="deleteTask(index, task)"
+												@click="deleteTask(list.element, task.element)"
 											/>
 										</div>
 									</div>
@@ -93,7 +93,7 @@
 						</div>
 						<div
 							class="task-button"
-							@click.stop="createTask(list.index)"
+							@click.stop="createTask(list.element)"
 						></div>
 					</div>
 				</template>
@@ -105,6 +105,13 @@
 <script>
 import draggable from "vuedraggable";
 
+class Task {
+	constructor(title, uid) {
+		this.title = title;
+		this.uid = uid
+	}
+}
+
 class List {
 	constructor(title, uid, ...tasks) {
 		this.title = title;
@@ -114,12 +121,7 @@ class List {
 		this.optionsOpen = false;
 	}
 	addTasks(...tasks) {
-		let counter = this.tasks.length;
-		const newTasks = tasks.map((t, idx) => ({
-			title: t,
-			uid: counter + idx,
-		}));
-		this.tasks.push(...newTasks);
+		this.tasks.push(...tasks);
 		return this;
 	}
 }
@@ -129,12 +131,7 @@ export default {
 	components: { draggable },
 	data() {
 		return {
-			lists: [
-				new List("Ideas", 0, "Idea1"),
-				new List("Todo", 1, "Todo1", "Todo2"),
-				new List("InProgress", 2, "inProgress1", "inProgress2"),
-				new List("Completed", 3),
-			],
+			lists: [],
 			hoveredTask: false,
 			currentBoard: null,
 		};
@@ -148,14 +145,17 @@ export default {
 			if (title === null) {
 				return;
 			}
-			// const res = await fetch(`${this.backendUrl}/`, {
-			// 	method: "POST",
-			// 	headers: { "Content-Type": "application/json" },
-			// 	body: JSON.stringify(body),
-			// });
-			this.lists.push(new List(title, this.lists.length));
+			const body = {title, index: this.lists.length};
+			const res = await this.request(`/lists/${this.currentBoard.uid}`, {method: 'POST', body})
+			if (res.status === 201) {
+				const json = await res.json();
+				const list = new List(json.title, json.index);
+				this.lists.push(list);
+			} else {
+				alert('Could not add the list')
+			}
 		},
-		createTask(listId) {
+		async createTask(list) {
 			const title = prompt("Task title");
 			if (title === "") {
 				return alert("Title cannot be empty");
@@ -163,7 +163,15 @@ export default {
 			if (title === null) {
 				return;
 			}
-			this.lists[listId].addTasks(title);
+			const body = {title, index: 0, listUid: list.uid};
+			const res = await this.request('/cards', {method: 'POST', body})
+			if (res.status === 201) {
+				const json = await res.json();
+				console.log(json)
+				list.addTasks(new Task(json.title, json.uid));
+			} else {
+				alert('Could not add the task');
+			}
 		},
 		editTask(listId, task) {
 			const title = prompt("New task title", task.element.title);
@@ -175,14 +183,14 @@ export default {
 			}
 			this.lists[listId].tasks[task.index].title = title;
 		},
-		deleteTask(listId, task) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${task.element.title}?`
-				)
-			)
-				return;
-			this.lists[listId].tasks.splice(task.index, 1);
+		async deleteTask(list, task) {
+			if (!confirm(`Are you sure you want to delete ${task.title}?`)) return;
+			const res = await this.request(`/cards/${list.uid}/${task.uid}`, {method: 'DELETE'})
+			if (res.status === 202) {
+				list.tasks.splice(task.index, 1);
+			} else {
+				alert('Could not delete the task')
+			}
 		},
 		showListOptions(selectedList) {
 			console.log(selectedList);
@@ -203,14 +211,14 @@ export default {
 			}
 			this.lists[listId].title = title;
 		},
-		deleteList(listId, list) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${list.element.title}?`
-				)
-			)
-				return;
-			this.lists.splice(listId, 1);
+		async deleteList(listId, list) {
+			if (!confirm(`Are you sure you want to delete ${list.title}?`)) return;
+			const res = await this.request(`/lists/${list.uid}`, {method: 'DELETE'});
+			if (res.status === 202) {
+				this.lists.splice(listId, 1);
+			} else {
+				alert('Could not delete the list')
+			}
 		},
 		goBack() {
 			this.currentBoard = null
@@ -218,9 +226,24 @@ export default {
 		}
 	},
 	mounted() {
-    this.listeners.loadBoard = board => {
+    this.listeners.loadBoard = async board => {
 			console.log(board)
 			this.currentBoard = board;
+			const res = await this.request(`/lists/${this.currentBoard.uid}`)
+			if (res.status === 200) {
+				const lists = await res.json();
+				console.log(lists)
+				for (const list of lists) {
+					const newList = new List(list.title, list.uid);
+					for (const card of (list.cards || [])) {
+						newList.addTasks(new Task(card.title, card.uid))
+					}
+					this.lists.push(newList)
+				}
+			} else {
+				alert('Could not load the board')
+				window.location.reload();
+			}
     }
   },
   beforeUnmount() {

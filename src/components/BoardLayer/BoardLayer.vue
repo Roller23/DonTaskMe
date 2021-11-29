@@ -51,7 +51,10 @@
 										<div
 											class="option delete"
 											@click="
-												deleteList(list.index, list)
+												deleteList(
+													list.index,
+													list.element
+												)
 											"
 										>
 											Delete
@@ -94,8 +97,8 @@
 													class="button"
 													@click="
 														deleteTask(
-															list.index,
-															task
+															list.element,
+															task.element
 														)
 													"
 												/>
@@ -106,7 +109,7 @@
 							</div>
 							<div
 								class="task-button"
-								@click.stop="createTask(list.index)"
+								@click.stop="createTask(list.element)"
 							></div>
 						</div>
 					</template>
@@ -119,6 +122,13 @@
 <script>
 import draggable from "vuedraggable";
 
+class Task {
+	constructor(title, uid) {
+		this.title = title;
+		this.uid = uid;
+	}
+}
+
 class List {
 	constructor(title, uid, ...tasks) {
 		this.title = title;
@@ -128,27 +138,16 @@ class List {
 		this.optionsOpen = false;
 	}
 	addTasks(...tasks) {
-		let counter = this.tasks.length;
-		const newTasks = tasks.map((t, idx) => ({
-			title: t,
-			uid: counter + idx,
-		}));
-		this.tasks.push(...newTasks);
+		this.tasks.push(...tasks);
 		return this;
 	}
 }
-
 export default {
 	name: "BoardLayer",
 	components: { draggable },
 	data() {
 		return {
-			lists: [
-				new List("Ideas", 0, "Idea1"),
-				new List("Todo", 1, "Todo1", "Todo2"),
-				new List("InProgress", 2, "inProgress1", "inProgress2"),
-				new List("Completed", 3),
-			],
+			lists: [],
 			currentBoard: null,
 		};
 	},
@@ -161,14 +160,20 @@ export default {
 			if (title === null) {
 				return;
 			}
-			// const res = await fetch(`${this.backendUrl}/`, {
-			// 	method: "POST",
-			// 	headers: { "Content-Type": "application/json" },
-			// 	body: JSON.stringify(body),
-			// });
-			this.lists.push(new List(title, this.lists.length));
+			const body = { title, index: this.lists.length };
+			const res = await this.request(`/lists/${this.currentBoard.uid}`, {
+				method: "POST",
+				body,
+			});
+			if (res.status === 201) {
+				const json = await res.json();
+				const list = new List(json.title, json.index);
+				this.lists.push(list);
+			} else {
+				alert("Could not add the list");
+			}
 		},
-		createTask(listId) {
+		async createTask(list) {
 			const title = prompt("Task title");
 			if (title === "") {
 				return alert("Title cannot be empty");
@@ -176,7 +181,15 @@ export default {
 			if (title === null) {
 				return;
 			}
-			this.lists[listId].addTasks(title);
+			const body = { title, index: 0, listUid: list.uid };
+			const res = await this.request("/cards", { method: "POST", body });
+			if (res.status === 201) {
+				const json = await res.json();
+				console.log(json);
+				list.addTasks(new Task(json.title, json.uid));
+			} else {
+				alert("Could not add the task");
+			}
 		},
 		editTask(listId, task) {
 			const title = prompt("New task title", task.element.title);
@@ -188,14 +201,17 @@ export default {
 			}
 			this.lists[listId].tasks[task.index].title = title;
 		},
-		deleteTask(listId, task) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${task.element.title}?`
-				)
-			)
+		async deleteTask(list, task) {
+			if (!confirm(`Are you sure you want to delete ${task.title}?`))
 				return;
-			this.lists[listId].tasks.splice(task.index, 1);
+			const res = await this.request(`/cards/${list.uid}/${task.uid}`, {
+				method: "DELETE",
+			});
+			if (res.status === 202) {
+				list.tasks.splice(task.index, 1);
+			} else {
+				alert("Could not delete the task");
+			}
 		},
 		showListOptions(selectedList, hide) {
 			if (hide) {
@@ -221,14 +237,17 @@ export default {
 			}
 			this.lists[listId].title = title;
 		},
-		deleteList(listId, list) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${list.element.title}?`
-				)
-			)
+		async deleteList(listId, list) {
+			if (!confirm(`Are you sure you want to delete ${list.title}?`))
 				return;
-			this.lists.splice(listId, 1);
+			const res = await this.request(`/lists/${list.uid}`, {
+				method: "DELETE",
+			});
+			if (res.status === 202) {
+				this.lists.splice(listId, 1);
+			} else {
+				alert("Could not delete the list");
+			}
 		},
 		goBack() {
 			this.currentBoard = null;
@@ -236,9 +255,24 @@ export default {
 		},
 	},
 	mounted() {
-		this.listeners.loadBoard = (board) => {
+		this.listeners.loadBoard = async (board) => {
 			console.log(board);
 			this.currentBoard = board;
+			const res = await this.request(`/lists/${this.currentBoard.uid}`);
+			if (res.status === 200) {
+				const lists = await res.json();
+				console.log(lists);
+				for (const list of lists) {
+					const newList = new List(list.title, list.uid);
+					for (const card of list.cards || []) {
+						newList.addTasks(new Task(card.title, card.uid));
+					}
+					this.lists.push(newList);
+				}
+			} else {
+				alert("Could not load the board");
+				window.location.reload();
+			}
 		};
 	},
 	beforeUnmount() {
@@ -267,13 +301,11 @@ export default {
 		"side top"
 		"side lists";
 }
-
 .layer h1 {
 	margin-left: 20px;
 	line-height: 58px;
 	color: white;
 }
-
 .side-wrap {
 	grid-area: side;
 	vertical-align: middle;
@@ -283,14 +315,12 @@ export default {
 	grid-template-rows: 100px auto;
 	justify-items: center;
 }
-
 .side-wrap .go-back {
 	width: 40px;
 	cursor: pointer;
 	filter: invert(100%);
 	align-self: center;
 }
-
 .list-button {
 	background-image: url(../../assets/add.png);
 	background-color: white;
@@ -303,16 +333,13 @@ export default {
 	margin-right: auto;
 	border-radius: 5px;
 }
-
 .list-button:hover {
 	border: 2px solid #56af9f;
 	cursor: pointer;
 }
-
 .list-wrap {
 	overflow-x: hidden;
 }
-
 .listContainer {
 	grid-area: lists;
 	display: flex;
@@ -321,7 +348,6 @@ export default {
 	overflow-x: auto;
 	height: 100%;
 }
-
 .list {
 	display: flex;
 	flex-direction: column;
@@ -331,17 +357,14 @@ export default {
 	border-radius: 5px;
 	padding: 0 10px 10px 10px;
 }
-
 .list:hover {
 	cursor: grab;
 }
-
 .task-container {
 	display: flex;
 	flex-direction: column;
 	padding-bottom: 25px;
 }
-
 .list-title {
 	display: inline-block;
 	border-radius: 10px;
@@ -351,30 +374,25 @@ export default {
 	margin-bottom: 10px;
 	color: white;
 }
-
 .list-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 }
-
 .list-header .more {
 	visibility: hidden;
 	align-self: flex-start;
 	margin-top: 15px;
 }
-
 .list-header .more img {
 	width: 15px;
 	filter: invert(100%);
 }
-
 .list:hover .list-header .more {
 	visibility: visible;
 	cursor: pointer;
 	position: relative;
 }
-
 .list-header .more .options {
 	background-color: white;
 	border-radius: 5px;
@@ -384,7 +402,6 @@ export default {
 	left: 120%;
 	padding: 10px;
 }
-
 .options .delete {
 	padding: 5px;
 	color: red;
@@ -401,11 +418,9 @@ export default {
 	color: white;
 	background-color: #56af9f;
 }
-
 .flip-list-move {
 	transition: transform 0.5s;
 }
-
 .task {
 	background-color: white;
 	margin-bottom: 10px;
@@ -414,28 +429,23 @@ export default {
 	display: flex;
 	justify-content: space-between;
 }
-
 .task:hover {
 	cursor: grab;
 	background-color: rgb(243, 243, 243);
 }
-
 .task:hover .buttons {
 	visibility: visible;
 }
-
 .buttons {
 	visibility: hidden;
 	min-width: 30px;
 }
-
 .buttons .button {
 	cursor: pointer;
 	width: 15px;
 	opacity: 0.5;
 	margin-left: 5px;
 }
-
 .task-button {
 	background-image: url(../../assets/add.png);
 	background-color: white;
@@ -448,24 +458,20 @@ export default {
 	margin-right: auto;
 	border-radius: 50%;
 }
-
 .task-button:hover {
 	color: #56af9f;
 	border: 2px solid #56af9f;
 	border-radius: 50%;
 	cursor: pointer;
 }
-
 .border-ghost {
 	border: 2px dashed white;
 }
-
 .fade-leave-active {
 	animation: slide 1.5s;
 }
 .fade-leave-to {
 }
-
 @keyframes slide {
 	0% {
 	}

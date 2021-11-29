@@ -45,7 +45,7 @@
 									</div>
 									<div
 										class="option delete"
-										@click="deleteList(list.index, list)"
+										@click="deleteList(list.index, list.element)"
 									>
 										Delete
 									</div>
@@ -211,14 +211,14 @@ export default {
 			}
 			this.lists[listId].title = title;
 		},
-		deleteList(listId, list) {
-			if (
-				!confirm(
-					`Are you sure you want to delete ${list.element.title}?`
-				)
-			)
-				return;
-			this.lists.splice(listId, 1);
+		async deleteList(listId, list) {
+			if (!confirm(`Are you sure you want to delete ${list.title}?`)) return;
+			const res = await this.request(`/lists/${list.uid}`, {method: 'DELETE'});
+			if (res.status === 202) {
+				this.lists.splice(listId, 1);
+			} else {
+				alert('Could not delete the list')
+			}
 		},
 		goBack() {
 			this.currentBoard = null

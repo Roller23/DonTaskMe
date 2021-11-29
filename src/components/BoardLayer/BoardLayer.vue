@@ -181,7 +181,7 @@ export default {
 			if (title === null) {
 				return;
 			}
-			const body = { title, index: 0, listUid: list.uid };
+			const body = { title, index: list.tasks.length, listUid: list.uid };
 			const res = await this.request("/cards", { method: "POST", body });
 			if (res.status === 201) {
 				const json = await res.json();

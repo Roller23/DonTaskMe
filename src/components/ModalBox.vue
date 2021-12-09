@@ -1,19 +1,21 @@
 <template>
   <div class="background-layer" v-if="rendered" :class="{visible}">
     <div class="box">
-      <h1>{{title}}</h1>
-      <hr>
-      <h3 v-if="type === 'alert' || type === 'confirm'">{{body}}</h3>
-      <p v-if="type === 'prompt'">
-        <input type="text" ref="input" v-model="inputValue" class="input" v-on:keyup.enter="acceptButton.handler">
-      </p>
-      <hr>
-      <div class="buttons">
-        <button v-for="button in buttons" :key="button.text"
-          class="btn" type="button" @click="button.handler"
-          :class="{neutral: button.theme === 'neutral', red: button.theme === 'red'}">
-          {{button.text}}
-        </button>
+      <div class="inner-box">
+        <h1>{{title}}</h1>
+        <hr v-if="type !== 'prompt'">
+        <h3 v-if="type === 'alert' || type === 'confirm'">{{body}}</h3>
+        <p v-if="type === 'prompt'">
+          <input type="text" ref="input" v-model="inputValue" class="input" v-on:keyup.enter="acceptButton.handler">
+        </p>
+        <hr v-if="type !== 'prompt'">
+        <div class="buttons">
+          <button v-for="button in buttons" :key="button.text"
+            class="btn" type="button" @click="button.handler"
+            :class="{neutral: button.theme === 'neutral', red: button.theme === 'red'}">
+            {{button.text}}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -34,8 +36,8 @@ export default {
   data() {
     return {
       type: null,
-      title: 'Some title',
-      body: 'Some body',
+      title: '',
+      body: '',
       buttons: [],
       rendered: false,
       visible: false,
@@ -168,21 +170,28 @@ export default {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  padding: 20px;
+  padding: 5px;
   border-radius: 30px;
   background-color: white;
-  border: 4px dashed #56AF9F;
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.inner-box {
+  border: 2px dashed #56AF9F;
+  padding: 20px;
+  border-radius: 30px;
 }
 
 .box .input {
-  border: 2px solid #56AF9F;
-  border-radius: 10px;
+  border: 0px;
+  border-bottom: 2px solid #56AF9F;
   outline: none;
   padding: 4px 10px;
   font-size: 16px;
   width: 100%;
   color: #222222;
+  background-color: rgb(243, 243, 243);
 }
 
 .buttons {
@@ -210,7 +219,7 @@ export default {
 
 .buttons .btn.red {
   background-color: white;
-  color: red;
-  border: 2px solid red;
+  color: rgb(204, 53, 53);
+  border: 2px solid rgb(204, 53, 53);
 }
 </style>

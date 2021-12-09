@@ -54,6 +54,7 @@
       </div>
     </div>
   </transition>
+  <ModalBox ref="modal"></ModalBox>
 </template>
 
 <script>
@@ -92,10 +93,12 @@ class Workspace {
   }
 }
 
+import ModalBox from './ModalBox.vue';
+
 export default {
   name: 'WorkspacesLayer',
   components: {
-    
+    ModalBox
   },
   data() {
     return {
@@ -106,6 +109,15 @@ export default {
     }
   },
   methods: {
+    async alert(text, title = '') {
+      return await this.$refs.modal.alert(text, title);
+    },
+    async prompt(title = '') {
+      return await this.$refs.modal.prompt(title);
+    },
+    async confirm(text, title = '') {
+      return await this.$refs.modal.confirm(text, title);
+    },
     hideBoards() {
       for (const workspace of this.workspaces) {
         workspace.hidden = false;
@@ -149,12 +161,13 @@ export default {
       this.currentBoardOptions = selectedBoard;
     },
     async deleteBoard(selectedBoard) {
-      if (!confirm(`Are you sure you want to delete ${selectedBoard.title}?`)) return;
+      const msg = `Are you sure you want to delete ${selectedBoard.title}?`;
+      if (!await this.confirm(msg)) return;
       const res = await this.request(`/boards/${this.currentWorkspace.uid}/${selectedBoard.uid}`, {method: 'DELETE'})
       if (res.status === 202) {
         this.currentWorkspace.removeBoard(selectedBoard)
       } else {
-        alert('Could not delete the board');
+        await this.alert('Could not delete the board');
       }
     },
     async getWorkspaces() {
@@ -171,17 +184,17 @@ export default {
         }
       } else {
         localStorage.removeItem('token');
-        alert('Could not load workspaces, log in again');
+        await this.alert('Could not load workspaces, log in again');
         window.location.reload();
       }
     },
     async newWorkspace() {
-      const title = prompt('Workspace title');
+      const title = await this.prompt('Workspace title');
       if (title === null) return;
       if (!title) {
-        return alert('Title cannot be empty');
+        return await this.alert('Title cannot be empty');
       }
-      const desc = prompt('Workspace description');
+      const desc = await this.prompt('Workspace description');
       const res = await this.request('/workspaces', {method: 'POST', body: {title, desc}})
       if (res.status === 201) {
         const json = await res.json();
@@ -193,7 +206,7 @@ export default {
       }
     },
     async createBoard() {
-      const title = prompt('Board title');
+      const title = await this.prompt('Board title');
       if (title === null) return;
       if (!title) return alert('Title cannot be empty');
       const body = {title, workspace: this.currentWorkspace.uid};
@@ -213,23 +226,24 @@ export default {
       this.visible = false;
       this.listeners.loadBoard(board);
     },
-    editWorkspace(workspace) {
+    async editWorkspace(workspace) {
       console.log(workspace);
-      const title = prompt('New title');
-      const desc = prompt('New description');
+      const title = await this.prompt('New title');
+      const desc = await this.prompt('New description');
       const data = {title, desc};
       return data;
     },
     async deleteWorkspace(workspace) {
       console.log(workspace);
-      if (!confirm(`Are you sure you want to delete ${workspace.title} and all of its boards?`)) return;
+      const msg = `Are you sure you want to delete ${workspace.title} and all of its boards?`;
+      if (!await this.confirm(msg)) return;
       const res = await this.request(`/workspaces/${workspace.uid}`, {method: 'DELETE'})
       if (res.status === 202) {
         const index = this.workspaces.indexOf(workspace);
         if (index === -1) return;
         this.workspaces.splice(index, 1);
       } else {
-        alert('Could not delete the workspace');
+        await this.alert('Could not delete the workspace');
       }
     }
   },

@@ -117,10 +117,12 @@
 			</div>
 		</div>
 	</transition>
+	<ModalBox ref="modal"></ModalBox>
 </template>
 
 <script>
 import draggable from "vuedraggable";
+import ModalBox from '../ModalBox.vue';
 
 class Task {
 	constructor(title, uid) {
@@ -144,7 +146,7 @@ class List {
 }
 export default {
 	name: "BoardLayer",
-	components: { draggable },
+	components: { draggable, ModalBox },
 	data() {
 		return {
 			lists: [],
@@ -152,10 +154,19 @@ export default {
 		};
 	},
 	methods: {
+		async alert(text, title = '') {
+      return await this.$refs.modal.alert(text, title);
+    },
+    async prompt(title = '') {
+      return await this.$refs.modal.prompt(title);
+    },
+    async confirm(text, title = '') {
+      return await this.$refs.modal.confirm(text, title);
+    },
 		async newList() {
-			const title = prompt("List title");
+			const title = await this.prompt("List title");
 			if (title === "") {
-				return alert("Title cannot be empty");
+				return await this.alert("Title cannot be empty");
 			}
 			if (title === null) {
 				return;
@@ -170,13 +181,13 @@ export default {
 				const list = new List(json.title, json.uid);
 				this.lists.push(list);
 			} else {
-				alert("Could not add the list");
+				await this.alert("Could not add the list");
 			}
 		},
 		async createTask(list) {
-			const title = prompt("Task title");
+			const title = await this.prompt("Task title");
 			if (title === "") {
-				return alert("Title cannot be empty");
+				return await this.alert("Title cannot be empty");
 			}
 			if (title === null) {
 				return;
@@ -188,13 +199,13 @@ export default {
 				console.log(json);
 				list.addTasks(new Task(json.title, json.uid));
 			} else {
-				alert("Could not add the task");
+				await this.alert("Could not add the task");
 			}
 		},
-		editTask(listId, task) {
-			const title = prompt("New task title", task.element.title);
+		async editTask(listId, task) {
+			const title = await this.prompt("New task title", task.element.title);
 			if (title === "") {
-				return alert("Title cannot be empty");
+				return await this.alert("Title cannot be empty");
 			}
 			if (title === null) {
 				return;
@@ -202,7 +213,7 @@ export default {
 			this.lists[listId].tasks[task.index].title = title;
 		},
 		async deleteTask(list, task) {
-			if (!confirm(`Are you sure you want to delete ${task.title}?`)) return;
+			if (!await this.confirm(`Are you sure you want to delete ${task.title}?`)) return;
 			const res = await this.request(`/cards/${list.uid}/${task.uid}`, {
 				method: "DELETE",
 			});
@@ -212,7 +223,7 @@ export default {
 					list.tasks.splice(index, 1);
 				}
 			} else {
-				alert("Could not delete the task");
+				await this.alert("Could not delete the task");
 			}
 		},
 		showListOptions(selectedList, hide) {
@@ -229,10 +240,10 @@ export default {
 			}
 			selectedList.optionsOpen = !selectedList.optionsOpen;
 		},
-		editList(listId, list) {
-			const title = prompt("New list title", list.element.title);
+		async editList(listId, list) {
+			const title = await this.prompt("New list title", list.element.title);
 			if (title === "") {
-				return alert("Title cannot be empty");
+				return await this.alert("Title cannot be empty");
 			}
 			if (title === null) {
 				return;
@@ -240,7 +251,7 @@ export default {
 			this.lists[listId].title = title;
 		},
 		async deleteList(listId, list) {
-			if (!confirm(`Are you sure you want to delete ${list.title}?`)) return;
+			if (!await this.confirm(`Are you sure you want to delete ${list.title}?`)) return;
 			const res = await this.request(`/lists/${list.uid}`, {
 				method: "DELETE",
 			});
@@ -250,7 +261,7 @@ export default {
 					this.lists.splice(index, 1);
 				}
 			} else {
-				alert("Could not delete the list");
+				await this.alert("Could not delete the list");
 			}
 		},
 		goBack() {
@@ -258,7 +269,7 @@ export default {
 			setTimeout(this.listeners.showWorkspaces, 500);
 		},
 	},
-	mounted() {
+	async mounted() {
 		this.listeners.loadBoard = async (board) => {
 			console.log(board);
 			this.currentBoard = board;
@@ -275,7 +286,7 @@ export default {
 					this.lists.push(newList);
 				}
 			} else {
-				alert("Could not load the board");
+				await this.alert("Could not load the board");
 				window.location.reload();
 			}
 		};
@@ -474,8 +485,6 @@ export default {
 }
 .fade-leave-active {
 	animation: slide 1.5s;
-}
-.fade-leave-to {
 }
 @keyframes slide {
 	0% {

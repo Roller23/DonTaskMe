@@ -1,6 +1,8 @@
 <template>
   <div class="background-layer" v-if="rendered" :class="{visible}">
     <div class="box">
+      <img class="icon" alt="Modal icon" :src="getIcon(icon)">
+      <img class="icon2" alt="Modal icon" :src="getIcon(icon)">
       <div class="inner-box">
         <h1>{{title}}</h1>
         <hr v-if="type !== 'prompt'">
@@ -43,11 +45,16 @@ export default {
       visible: false,
       acceptButton: null,
       documentHandler: null,
-      inputValue: ''
+      inputValue: '',
+      icon: 'question-mark.png'
     }
   },
   methods: {
+    getIcon(name) {
+      return require(`../assets/${name}`);
+    },
     async alert(text, title = '') {
+      this.icon = 'exclamation-mark.png';
       this.body = text;
       this.title = title;
       this.type = 'alert';
@@ -75,6 +82,7 @@ export default {
       return promise;
     },
     async prompt(title = '', defaultValue = '') {
+      this.icon = 'pencil.png'
       this.body = null;
       this.title = title;
       this.type = 'prompt';
@@ -112,6 +120,7 @@ export default {
       return promise;
     },
     async confirm(text, title = '') {
+      this.icon = 'question-mark.png';
       this.body = text;
       this.title = title;
       this.type = 'confirm';
@@ -175,6 +184,32 @@ export default {
   background-color: white;
   width: 100%;
   max-width: 400px;
+}
+
+.box .icon {
+  width: 50px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  transform: translate(10%, -10%) rotate(5deg);
+  transition: 0.3s;
+}
+
+.box .icon2 {
+  width: 70px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  transform: translate(10%, -10%) rotate(5deg);
+  transition: 0.3s;
+}
+
+.background-layer.visible .box .icon {
+  transform: translate(-20%, -50%) rotate(-20deg);
+}
+
+.background-layer.visible .box .icon2 {
+  transform: translate(60%, -30%) rotate(20deg);
 }
 
 .inner-box {

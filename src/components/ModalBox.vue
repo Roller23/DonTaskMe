@@ -72,12 +72,13 @@ export default {
       setTimeout(() => this.visible = true, 0)
       return promise;
     },
-    async prompt(title = '') {
+    async prompt(title = '', defaultValue = '') {
       this.body = null;
       this.title = title;
       this.type = 'prompt';
       this.acceptButton = null;
       this.buttons.splice(0);
+      this.inputValue = defaultValue;
       const promise = new Promise(resolve => {
         const createHandler = returnNull => {
           return () => {

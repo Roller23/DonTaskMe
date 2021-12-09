@@ -486,8 +486,6 @@ export default {
 .fade-leave-active {
 	animation: slide 1.5s;
 }
-.fade-leave-to {
-}
 @keyframes slide {
 	0% {
 	}

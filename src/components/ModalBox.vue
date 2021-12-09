@@ -5,11 +5,11 @@
       <hr>
       <h3 v-if="type === 'alert' || type === 'confirm'">{{body}}</h3>
       <p v-if="type === 'prompt'">
-        <input type="text" ref="input" class="input" v-on:keyup.enter="acceptButton.handler">
+        <input type="text" ref="input" v-model="inputValue" class="input" v-on:keyup.enter="acceptButton.handler">
       </p>
       <hr>
       <div class="buttons">
-        <button v-for="button in buttons" v-bind:key="button.text"
+        <button v-for="button in buttons" :key="button.text"
           class="btn" type="button" @click="button.handler"
           :class="{neutral: button.theme === 'neutral', red: button.theme === 'red'}">
           {{button.text}}
@@ -40,7 +40,8 @@ export default {
       rendered: false,
       visible: false,
       acceptButton: null,
-      documentHandler: null
+      documentHandler: null,
+      inputValue: ''
     }
   },
   methods: {
@@ -83,8 +84,10 @@ export default {
             this.visible = false;
             setTimeout(() => {
               this.rendered = false;
-              document.removeEventListener('keyup', this.documentHandler)
-              resolve(returnNull ? null : this.$refs.input.value);
+              document.removeEventListener('keyup', this.documentHandler);
+              let value = this.inputValue;
+              this.inputValue = '';
+              resolve(returnNull ? null : value);
             }, 500);
           }
         }

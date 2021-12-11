@@ -170,7 +170,28 @@ export default {
 			this.$refs.file.click();
 		},
 		async uploadFile() {
-			console.log(this.$refs.file.files[0])
+			const files = this.$refs.file.files;
+			if (files.length === 0) {
+				return await this.alert('No files selected');
+			}
+			console.log(files)
+			const xhr = new XMLHttpRequest();
+			xhr.onerror = async (e) => {
+				console.log(e)
+				await this.alert("An error occured");
+			}
+			xhr.upload.onprogress = function(e) {
+				console.log(e)
+			}
+			xhr.onload = function() {
+				console.log(this.responseText)
+			}
+			const data = new FormData();
+			data.append('file', files[0]);
+			data.append('token', localStorage.token)
+			xhr.open('POST', `${this.backendUrl}/cards/123/upload`, true);
+			xhr.send(data);
+			this.$refs.file.value = '';
 		},
 		async newList() {
 			const title = await this.prompt("List title");

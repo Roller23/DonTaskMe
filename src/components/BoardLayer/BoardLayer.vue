@@ -9,6 +9,9 @@
 					@click="goBack"
 				/>
 				<div class="list-button" @click.stop="newList"></div>
+
+				<input type="file" multiple style="display:none;" ref="file" @change="uploadFile">
+				<div class="list-button" @click.stop="triggerUpload"></div>
 			</div>
 			<h1>{{ currentBoard.title }}</h1>
 			<div class="list-wrap">
@@ -163,6 +166,12 @@ export default {
     async confirm(text, title = '') {
       return await this.$refs.modal.confirm(text, title);
     },
+		async triggerUpload() {
+			this.$refs.file.click();
+		},
+		async uploadFile() {
+			console.log(this.$refs.file.files[0])
+		},
 		async newList() {
 			const title = await this.prompt("List title");
 			if (title === "") {

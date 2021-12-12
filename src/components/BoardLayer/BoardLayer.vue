@@ -77,7 +77,13 @@
 									<template #item="task">
 										<div
 											class="task"
-											@click="selectCard(task.element)"
+											@click="
+												selectCard(
+													list.element.tasks[
+														task.index
+													]
+												)
+											"
 										>
 											<div>
 												{{ task.element.title }}
@@ -136,9 +142,11 @@ import ModalBox from "../ModalBox.vue";
 import Card from "./Card.vue";
 
 class Task {
-	constructor(title, uid) {
+	constructor(title, uid, files, comments) {
 		this.title = title;
 		this.uid = uid;
+		this.files = files;
+		this.comments = comments;
 	}
 }
 
@@ -312,7 +320,14 @@ export default {
 				for (const list of lists) {
 					const newList = new List(list.title, list.uid);
 					for (const card of list.cards || []) {
-						newList.addTasks(new Task(card.title, card.uid));
+						newList.addTasks(
+							new Task(
+								card.title,
+								card.uid,
+								card.files,
+								card.comments
+							)
+						);
 					}
 					this.lists.push(newList);
 				}

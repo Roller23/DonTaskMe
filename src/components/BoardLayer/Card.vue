@@ -26,10 +26,7 @@
 							Drop your files!
 						</div>
 						<div v-else class="file-container">
-							<div
-								v-for="file in attachments"
-								v-bind:key="file.uid"
-							>
+							<div v-for="file in files" v-bind:key="file.uid">
 								<div class="file" @click.stop="showFile(file)">
 									{{ file.filename }}
 								</div>
@@ -86,8 +83,8 @@ export default {
 		return {
 			title: this.card.title,
 			description: this.card.description,
-			attachments: [],
-			comments: [],
+			files: this.card.files || [],
+			comments: this.card.comments || [],
 			comment: "",
 			dragovering: false,
 		};
@@ -122,7 +119,7 @@ export default {
 			xhr.upload.onprogress = function(e) {
 				console.log(e);
 			};
-			let attachmentList = this.attachments;
+			const attachmentList = this.files;
 			xhr.onload = function() {
 				console.log(this.responseText);
 				let res = JSON.parse(this.responseText);
@@ -131,6 +128,7 @@ export default {
 					res.storagePath,
 					res.filename
 				);
+				console.log(attachmentList);
 				attachmentList.push(attachment);
 			};
 			const data = new FormData();
@@ -171,39 +169,6 @@ export default {
 				alert("Could not add the task");
 			}
 		},
-	},
-	mounted() { // TODO: do this async
-		const res = await this.request(`/cards/${this.card.uid}/file`); // TODO: what's the GET url?
-		if (res.status === 200) {
-			const files = await res.json();
-			for (const file of files) {
-				const attachment = new File(
-					file.uid,
-					file.storagePath,
-					file.filename
-				);
-				attachmentList.push(attachment);
-			}
-		} else {
-			alert("Could not load files");
-			window.location.reload();
-		}
-		const res = await this.request(`/cards/${this.card.uid}/comment`);
-		if (res.status === 200) {
-			const comments = await res.json();
-			for (const comment of comments) {
-				let newComment = new Comment(
-					comment.uid,
-					comment.content,
-					comment.date,
-					comment.username
-				);
-				this.comments.push(newComment);
-			}
-		} else {
-			alert("Could not load comments");
-			window.location.reload();
-		}
 	},
 };
 </script>

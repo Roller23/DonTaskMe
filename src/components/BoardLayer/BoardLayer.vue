@@ -142,9 +142,10 @@ import ModalBox from "../ModalBox.vue";
 import Card from "./Card.vue";
 
 class Task {
-	constructor(title, uid, files, comments) {
+	constructor(title, uid, description, files, comments) {
 		this.title = title;
 		this.uid = uid;
+		this.description = description;
 		this.files = files;
 		this.comments = comments;
 	}
@@ -305,6 +306,7 @@ export default {
 			setTimeout(this.listeners.showWorkspaces, 500);
 		},
 		selectCard(task) {
+			console.log(task);
 			this.cardSelected = task;
 		},
 	},
@@ -324,6 +326,7 @@ export default {
 							new Task(
 								card.title,
 								card.uid,
+								card.description,
 								card.files,
 								card.comments
 							)

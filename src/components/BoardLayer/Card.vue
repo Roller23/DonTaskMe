@@ -2,10 +2,16 @@
 	<div class="overlay" @click.stop="unselect($event)">
 		<transition name="section" mode="out-in" appear>
 			<div class="card">
-				<h1>{{ this.title }}</h1>
-				<div class="inside" ref='inside'>
+				<textarea
+					class="title"
+					v-on:keydown.enter.prevent="editCard"
+					v-model="this.title"
+					oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
+				/>
+				<div class="inside" ref="inside">
 					<textarea
 						v-model="this.description"
+						v-on:keydown.enter.prevent="editCard"
 						placeholder="Oh please, tell me more..."
 					/>
 					<div
@@ -44,17 +50,19 @@
 							v-bind:key="comment.uid"
 						>
 							<div class="author">
-								{{comment.username}}
-								<span class="date">{{formatDate(comment.date)}}</span>
+								{{ comment.username }}
+								<span class="date">{{
+									formatDate(comment.date)
+								}}</span>
 							</div>
-							<div class="comment">{{comment.content}}</div>
+							<div class="comment">{{ comment.content }}</div>
 						</div>
 					</div>
 				</div>
 				<textarea
 					class="comment-input"
 					ref="commentInput"
-					v-on:input='resizeTextarea'
+					v-on:input="resizeTextarea"
 					v-on:keydown.enter="sendComment"
 					v-model="comment"
 				></textarea>
@@ -64,8 +72,7 @@
 </template>
 
 <script>
-
-import moment from 'moment'
+import moment from "moment";
 
 class Comment {
 	constructor(uid, content, date, username) {
@@ -100,6 +107,15 @@ export default {
 	methods: {
 		unselect(e) {
 			if (e.target.className === "overlay") this.$emit("unselected");
+			// this.$emit(
+			// 	"unselected",
+			// 	new Card(
+			// 		this.title,
+			// 		this.description,
+			// 		this.files,
+			// 		this.comments
+			// 	)
+			// );
 		},
 		toggleAttachments() {
 			this.showAttachments = !this.showAttachments;
@@ -162,7 +178,15 @@ export default {
 		resizeTextarea() {
 			const input = this.$refs.commentInput;
 			if (input.scrollHeight <= 100) return;
-			input.style.height = input.scrollHeight * 2 + "px"
+			input.style.height = input.scrollHeight * 2 + "px";
+		},
+		async editCard() {
+			const body = { title: this.title, description: this.description };
+			console.log(body);
+			await this.request(`/cards/${this.card.uid}`, {
+				method: "PUT",
+				body,
+			});
 		},
 		async sendComment(e) {
 			if (e.shiftKey) return;
@@ -176,7 +200,7 @@ export default {
 				body,
 			});
 			if (res.status === 201) {
-				this.comment = '';
+				this.comment = "";
 				const json = await res.json();
 				console.log(json);
 				let comment = new Comment(
@@ -189,9 +213,9 @@ export default {
 				setTimeout(() => {
 					this.$refs.inside.scroll({
 						top: 100000000,
-						behavior: 'smooth'
-					})
-				}, 0)
+						behavior: "smooth",
+					});
+				}, 0);
 			} else {
 				await this.alert("Could not add the comment");
 			}
@@ -221,6 +245,21 @@ export default {
 	padding: 30px;
 }
 
+.card .title {
+	font-family: Avenir, Helvetica, Arial, sans-serif;
+	font-weight: bold;
+	background-color: rgba(255, 255, 255, 0);
+	border: none;
+	color: #56af9f;
+	outline: 0;
+	margin-bottom: 20px;
+	font-size: 2em;
+}
+
+.card .title:focus {
+	background-color: rgba(255, 255, 255, 0.137);
+}
+
 .inside {
 	overflow-y: auto;
 	margin-bottom: 10px;
@@ -236,6 +275,7 @@ export default {
 }
 
 textarea {
+	font-family: Avenir, Helvetica, Arial, sans-serif;
 	background-color: rgba(255, 255, 255, 0);
 	color: white;
 	resize: none;
@@ -245,7 +285,6 @@ textarea {
 
 .inside > textarea:focus {
 	background-color: rgba(255, 255, 255, 0.137);
-	border: 0px;
 }
 
 .attachments > h3 {

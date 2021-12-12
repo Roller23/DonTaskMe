@@ -3,7 +3,7 @@
 		<transition name="section" mode="out-in" appear>
 			<div class="card">
 				<h1>{{ this.title }}</h1>
-				<div class="inside">
+				<div class="inside" ref='inside'>
 					<textarea
 						v-model="this.description"
 						placeholder="Oh please, tell me more..."
@@ -43,27 +43,30 @@
 							v-for="comment in comments"
 							v-bind:key="comment.uid"
 						>
-							<div class="comment" />
+							<div class="author">
+								{{comment.username}}
+								<span class="date">{{formatDate(comment.date)}}</span>
+							</div>
+							<div class="comment">{{comment.content}}</div>
 						</div>
-						<div class="comment" />
-						<div class="comment" />
-						<div class="comment" />
-						<div class="comment" />
-						<div class="comment" />
-						<textarea
-							class="comment"
-							oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
-							v-on:keyup.enter="sendComment"
-							v-model="comment"
-						></textarea>
 					</div>
 				</div>
+				<textarea
+					class="comment-input"
+					ref="commentInput"
+					v-on:input='resizeTextarea'
+					v-on:keydown.enter="sendComment"
+					v-model="comment"
+				></textarea>
 			</div>
 		</transition>
 	</div>
 </template>
 
 <script>
+
+import moment from 'moment'
+
 class Comment {
 	constructor(uid, content, date, username) {
 		this.uid = uid;
@@ -151,9 +154,19 @@ export default {
 			this.$refs.file.value = "";
 		},
 		showFile(file) {
-			window.open(file.storagePath, "_blank").focus(); // TODO: php path na poczatek
+			window.open(file.storagePath, "_blank").focus();
 		},
-		async sendComment() {
+		formatDate(date) {
+			return moment(date * 1000).fromNow();
+		},
+		resizeTextarea() {
+			const input = this.$refs.commentInput;
+			if (input.scrollHeight <= 100) return;
+			input.style.height = input.scrollHeight * 2 + "px"
+		},
+		async sendComment(e) {
+			if (e.shiftKey) return;
+			e.preventDefault();
 			if (this.comment === "") {
 				return;
 			}
@@ -163,6 +176,7 @@ export default {
 				body,
 			});
 			if (res.status === 201) {
+				this.comment = '';
 				const json = await res.json();
 				console.log(json);
 				let comment = new Comment(
@@ -172,8 +186,14 @@ export default {
 					json.username
 				);
 				this.comments.push(comment);
+				setTimeout(() => {
+					this.$refs.inside.scroll({
+						top: 100000000,
+						behavior: 'smooth'
+					})
+				}, 0)
 			} else {
-				alert("Could not add the task");
+				await this.alert("Could not add the comment");
 			}
 		},
 	},
@@ -202,7 +222,8 @@ export default {
 }
 
 .inside {
-	overflow-y: hidden;
+	overflow-y: auto;
+	margin-bottom: 10px;
 }
 
 .card .inside div > *:not(:first-child) {
@@ -280,10 +301,36 @@ textarea {
 	align-content: space-between;
 }
 
-.comments > textarea {
+.comment-input {
 	border-width: 0 0 2px;
 	border-color: #56af9f;
 	background-color: rgba(255, 255, 255, 0);
+	height: 100px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.comments .comment {
+	margin: 10px 0px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	background: #434343;
+	border-radius: 15px;
+	padding: 5px 10px;
+	border-right: 3px solid rgba(255, 255, 255, 0.137);
+	border-bottom: 3px solid rgba(255, 255, 255, 0.137);
+}
+
+.comments .author {
+	font-weight: bold;
+	color: #56af9f;
+}
+
+.comments .author .date {
+	font-weight: normal;
+	font-size: 12px;
+	color: gray;
+	float: right;
+	line-height: 20px;
 }
 
 @keyframes slideIn {

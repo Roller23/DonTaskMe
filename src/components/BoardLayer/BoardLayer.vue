@@ -75,7 +75,10 @@
 									}"
 								>
 									<template #item="task">
-										<div class="task">
+										<div
+											class="task"
+											@click="selectCard(task.element)"
+										>
 											<div>
 												{{ task.element.title }}
 											</div>
@@ -117,12 +120,20 @@
 			</div>
 		</div>
 	</transition>
+	<transition name="cardFade" mode="out-in" appear>
+		<Card
+			v-if="cardSelected"
+			:card="cardSelected"
+			@unselected="cardSelected = null"
+		/>
+	</transition>
 	<ModalBox ref="modal"></ModalBox>
 </template>
 
 <script>
 import draggable from "vuedraggable";
-import ModalBox from '../ModalBox.vue';
+import ModalBox from "../ModalBox.vue";
+import Card from "./Card.vue";
 
 class Task {
 	constructor(title, uid) {
@@ -146,23 +157,24 @@ class List {
 }
 export default {
 	name: "BoardLayer",
-	components: { draggable, ModalBox },
+	components: { draggable, ModalBox, Card },
 	data() {
 		return {
 			lists: [],
 			currentBoard: null,
+			cardSelected: false,
 		};
 	},
 	methods: {
-		async alert(text, title = '') {
-      return await this.$refs.modal.alert(text, title);
-    },
-    async prompt(title = '') {
-      return await this.$refs.modal.prompt(title);
-    },
-    async confirm(text, title = '') {
-      return await this.$refs.modal.confirm(text, title);
-    },
+		async alert(text, title = "") {
+			return await this.$refs.modal.alert(text, title);
+		},
+		async prompt(title = "") {
+			return await this.$refs.modal.prompt(title);
+		},
+		async confirm(text, title = "") {
+			return await this.$refs.modal.confirm(text, title);
+		},
 		async newList() {
 			const title = await this.prompt("List title");
 			if (title === "") {
@@ -203,7 +215,10 @@ export default {
 			}
 		},
 		async editTask(listId, task) {
-			const title = await this.prompt("New task title", task.element.title);
+			const title = await this.prompt(
+				"New task title",
+				task.element.title
+			);
 			if (title === "") {
 				return await this.alert("Title cannot be empty");
 			}
@@ -213,8 +228,15 @@ export default {
 			this.lists[listId].tasks[task.index].title = title;
 		},
 		async deleteTask(list, task) {
-			if (!await this.confirm(`Are you sure you want to delete ${task.title}?`)) return;
-			const res = await this.request(`/cards/${task.uid}`, {method: "DELETE"});
+			if (
+				!(await this.confirm(
+					`Are you sure you want to delete ${task.title}?`
+				))
+			)
+				return;
+			const res = await this.request(`/cards/${task.uid}`, {
+				method: "DELETE",
+			});
 			if (res.status === 202) {
 				const index = list.tasks.indexOf(task);
 				if (index !== -1) {
@@ -239,7 +261,10 @@ export default {
 			selectedList.optionsOpen = !selectedList.optionsOpen;
 		},
 		async editList(listId, list) {
-			const title = await this.prompt("New list title", list.element.title);
+			const title = await this.prompt(
+				"New list title",
+				list.element.title
+			);
 			if (title === "") {
 				return await this.alert("Title cannot be empty");
 			}
@@ -249,7 +274,12 @@ export default {
 			this.lists[listId].title = title;
 		},
 		async deleteList(listId, list) {
-			if (!await this.confirm(`Are you sure you want to delete ${list.title}?`)) return;
+			if (
+				!(await this.confirm(
+					`Are you sure you want to delete ${list.title}?`
+				))
+			)
+				return;
 			const res = await this.request(`/lists/${list.uid}`, {
 				method: "DELETE",
 			});
@@ -265,6 +295,9 @@ export default {
 		goBack() {
 			this.currentBoard = null;
 			setTimeout(this.listeners.showWorkspaces, 500);
+		},
+		selectCard(task) {
+			this.cardSelected = task;
 		},
 	},
 	async mounted() {
@@ -491,6 +524,30 @@ export default {
 		transform: translateX(50%) translateX(-35%);
 	}
 	100% {
+		opacity: 0;
+	}
+}
+
+.cardFade-enter-active {
+	animation: fadeIn 0.5s;
+}
+.cardFade-leave-active {
+	animation: fadeOut 0.5s;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
 		opacity: 0;
 	}
 }

@@ -45,6 +45,11 @@
 						>
 							<div class="comment" />
 						</div>
+						<div class="comment" />
+						<div class="comment" />
+						<div class="comment" />
+						<div class="comment" />
+						<div class="comment" />
 						<textarea
 							class="comment"
 							oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
@@ -121,15 +126,17 @@ export default {
 			};
 			const attachmentList = this.files;
 			xhr.onload = function() {
-				console.log(this.responseText);
-				let res = JSON.parse(this.responseText);
-				let attachment = new File(
-					res.uid,
-					res.storagePath,
-					res.filename
-				);
-				console.log(attachmentList);
-				attachmentList.push(attachment);
+				if (this.status === 202) {
+					let res = JSON.parse(this.responseText);
+					let attachment = new File(
+						res.uid,
+						res.storagePath,
+						res.filename
+					);
+					attachmentList.push(attachment);
+				} else {
+					alert("Could not add the file");
+				}
 			};
 			const data = new FormData();
 			data.append("file", files[0]);

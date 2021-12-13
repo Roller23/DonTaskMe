@@ -55,9 +55,17 @@
                                                   'background-size': 'cover',
                                               }
                                             : { background: 'white' },
+                                        { color: 'grey' },
+                                        { 'font-size': '.5em' },
                                     ]"
                                 >
                                     {{ file.filename }}
+                                    <img
+                                        src="@/assets/delete.png"
+                                        alt="Delete button"
+                                        class="button"
+                                        @click.stop="deleteFile(file.uid)"
+                                    />
                                 </div>
                             </div>
                             <div
@@ -249,6 +257,23 @@ export default {
                 await this.alert("Could not add the comment");
             }
         },
+        async deleteFile(fileUid) {
+            const res = await this.request(
+                `/cards/${this.card.uid}/upload/${fileUid}`,
+                {
+                    method: "DELETE",
+                }
+            );
+            console.log(res.status);
+            if (res.status === 202) {
+                const index = this.files.findIndex(
+                    (file) => file.uid === fileUid
+                );
+                this.files.splice(index, 1);
+            } else {
+                await this.alert("Could not delete file");
+            }
+        },
     },
     mounted() {
         this.resizeTextarea("titleInput");
@@ -351,8 +376,18 @@ textarea {
     height: 50px;
     border-radius: 5px;
     padding-left: 5px;
-    color: rgb(118, 118, 118);
     overflow-y: clip;
+    position: relative;
+}
+
+.attachments .file > .button {
+    position: absolute;
+    background-color: rgb(143, 0, 0);
+    padding: 3px;
+    cursor: pointer;
+    width: 15px;
+    bottom: 0;
+    right: 0;
 }
 
 .file-button {

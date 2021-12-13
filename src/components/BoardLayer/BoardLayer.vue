@@ -329,6 +329,7 @@ export default {
                 for (const list of lists) {
                     const newList = new List(list.title, list.uid);
                     for (const card of list.cards || []) {
+												console.log('comments', card.comments)
                         newList.addTasks(
                             new Task(
                                 card.title,

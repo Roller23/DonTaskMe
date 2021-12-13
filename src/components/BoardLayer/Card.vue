@@ -39,10 +39,12 @@
                             Drop your files!
                         </div>
                         <div v-else class="file-container">
-                            <div v-for="file in files" v-bind:key="file.uid">
+                            <a v-for="file in files" v-bind:key="file.uid"
+														class="file-link" :download="file.filename"
+														:href="file.storagePath"
+														@click.prevent="downloadFile(file.storagePath, file.filename)">
                                 <div
                                     class="file"
-                                    @click.stop="showFile(file)"
                                     :style="[
                                         file.storagePath.match(
                                             /.(jpg|jpeg|png|gif)$/i
@@ -65,7 +67,7 @@
                                         @click.stop="deleteFile(file.uid)"
                                     />
                                 </div>
-                            </div>
+                            </a>
                             <div
                                 class="file file-button"
                                 @click.stop="triggerUpload"
@@ -188,6 +190,17 @@ export default {
             this.dragovering = false;
             this.dragoveringComment = false;
         },
+				downloadFile(path, name) {
+					fetch(path).then(res => res.blob()).then(blob => {
+						const blobURL = URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = blobURL;
+						a.style = "display: none";
+						a.download = name;
+						document.body.appendChild(a);
+						a.click();
+					})
+				},
         async uploadFile() {
             if (this.prepareUpload) return;
             const files = this.$refs.file.files;
@@ -227,9 +240,6 @@ export default {
             xhr.send(data);
 
             this.$refs.file.value = "";
-        },
-        showFile(file) {
-            window.open(file.storagePath, "_blank"); // TODO: set in PHP that link forces download
         },
         formatDate(date) {
             return moment(date * 1000).fromNow();
@@ -415,6 +425,10 @@ textarea {
     margin-right: 10px;
     display: flex;
     flex-wrap: wrap;
+}
+
+.attachments .file-link {
+	display: block;
 }
 
 .attachments .file {

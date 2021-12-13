@@ -484,6 +484,10 @@ textarea {
     place-self: center;
 }
 
+.comment-input-area .button:hover {
+    background-color: #6ad8c4;
+}
+
 .comment-input-area .prepare {
     position: absolute;
     top: 0;

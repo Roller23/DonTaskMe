@@ -64,7 +64,7 @@
                                         src="@/assets/delete.png"
                                         alt="Delete button"
                                         class="button"
-                                        @click.stop="deleteFile(file.uid)"
+                                        @click.prevent.stop="deleteFile(file.uid)"
                                     />
                                 </div>
                             </a>
@@ -310,7 +310,7 @@ export default {
         },
         async deleteFile(fileUid) {
             if (
-                !(await this.confirm(
+                !(confirm(
                     `Are you sure you want to delete this file?`
                 ))
             )
@@ -327,7 +327,7 @@ export default {
                 );
                 this.files.splice(index, 1);
             } else {
-                await this.alert("Could not delete file"); //TODO: doesn't work, pewnie potrzebuje tych modali
+                alert("Could not delete file");
             }
         },
     },
@@ -449,12 +449,13 @@ textarea {
 
 .attachments .file > .button {
     position: absolute;
-    background-color: rgb(143, 0, 0);
+    background-color: rgb(0 243 255);
     padding: 3px;
     cursor: pointer;
     width: 15px;
     top: 0;
     right: 0;
+		filter: invert(1);
 }
 
 .file-button {

@@ -130,6 +130,7 @@
         <Card
             v-if="cardSelected"
             :card="cardSelected"
+            :modal="this.$refs.modal"
             @unselected="unselectCard"
         />
     </transition>

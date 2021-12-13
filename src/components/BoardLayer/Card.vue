@@ -119,12 +119,10 @@
       </div>
     </transition>
   </div>
-	<ModalBox ref="cardModal"></ModalBox>
 </template>
 
 <script>
 import moment from "moment";
-import ModalBox from "../ModalBox.vue";
 
 class Comment {
   constructor(uid, content, date, username) {
@@ -145,8 +143,7 @@ class File {
 
 export default {
   name: "Card",
-  props: ["card"],
-	components: { ModalBox },
+  props: ["card", "modal"],
   data() {
     return {
       title: this.card.title,
@@ -161,13 +158,13 @@ export default {
   },
   methods: {
 		async alert(text, title = "") {
-				return await this.$refs.cardModal.alert(text, title);
+				return await this.modal.alert(text, title);
 		},
 		async prompt(title = "") {
-				return await this.$refs.cardModal.prompt(title);
+				return await this.modal.prompt(title);
 		},
 		async confirm(text, title = "") {
-				return await this.$refs.cardModal.confirm(text, title);
+				return await this.modal.confirm(text, title);
 		},
     unselect(e) {
       if (e.target.className === "overlay")

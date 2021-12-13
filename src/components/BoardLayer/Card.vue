@@ -119,10 +119,12 @@
       </div>
     </transition>
   </div>
+	<ModalBox ref="cardModal"></ModalBox>
 </template>
 
 <script>
 import moment from "moment";
+import ModalBox from "../ModalBox.vue";
 
 class Comment {
   constructor(uid, content, date, username) {
@@ -144,6 +146,7 @@ class File {
 export default {
   name: "Card",
   props: ["card"],
+	components: { ModalBox },
   data() {
     return {
       title: this.card.title,
@@ -157,6 +160,15 @@ export default {
     };
   },
   methods: {
+		async alert(text, title = "") {
+				return await this.$refs.cardModal.alert(text, title);
+		},
+		async prompt(title = "") {
+				return await this.$refs.cardModal.prompt(title);
+		},
+		async confirm(text, title = "") {
+				return await this.$refs.cardModal.confirm(text, title);
+		},
     unselect(e) {
       if (e.target.className === "overlay")
         this.$emit("unselected", {
@@ -204,15 +216,16 @@ export default {
         console.log(e);
       };
       const attachmentList = this.files;
+			const self = this;
       const promise = new Promise(resolve => {
-        xhr.onload = function () {
+        xhr.onload = async function () {
           if (this.status === 202) {
             let res = JSON.parse(this.responseText);
             let attachment = new File(res.uid, res.storagePath, res.filename);
             attachmentList.push(attachment);
             resolve(res.filename);
           } else {
-            alert("Could not add the file");
+            await self.alert("Could not add the file");
           }
         };
       });
@@ -305,7 +318,7 @@ export default {
       }
     },
     async deleteFile(fileUid) {
-      if (!confirm(`Are you sure you want to delete this file?`)) return;
+      if (!await this.confirm(`Are you sure you want to delete this file?`)) return;
       const res = await this.request(
         `/cards/${this.card.uid}/upload/${fileUid}`,
         {
@@ -316,7 +329,7 @@ export default {
         const index = this.files.findIndex((file) => file.uid === fileUid);
         this.files.splice(index, 1);
       } else {
-        alert("Could not delete file");
+        await this.alert("Could not delete file");
       }
     },
   },

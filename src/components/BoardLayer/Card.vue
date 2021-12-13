@@ -292,6 +292,7 @@ export default {
           json.date,
           json.username
         );
+				comment.fileAttached = attachment;
         this.comments.push(comment);
         setTimeout(() => {
           this.$refs.inside.scroll({

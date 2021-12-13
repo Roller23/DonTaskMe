@@ -316,7 +316,6 @@ export default {
             this.cardSelected.files = files;
             this.cardSelected.comments = comments;
             this.cardSelected = null;
-						console.log('unselected')
         },
     },
     async mounted() {

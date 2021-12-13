@@ -1,7 +1,7 @@
 <template>
   <div class="overlay" @click.stop="unselect($event)">
     <transition name="section" mode="out-in" appear>
-      <div class="card">
+      <div class="card" v-if="this.showCard">
         <textarea
           class="title"
           ref="titleInput"
@@ -154,6 +154,7 @@ export default {
       dragovering: false,
       dragoveringComment: false,
       prepareUpload: false,
+      showCard: true
     };
   },
   methods: {
@@ -167,13 +168,17 @@ export default {
 				return await this.modal.confirm(text, title);
 		},
     unselect(e) {
-      if (e.target.className === "overlay")
-        this.$emit("unselected", {
-          title: this.title,
-          description: this.description,
-          files: this.files,
-          comments: this.comments,
-        });
+      if (e.target.className === "overlay") {
+        this.showCard = false;
+        setTimeout(() => {
+          this.$emit("unselected", {
+            title: this.title,
+            description: this.description,
+            files: this.files,
+            comments: this.comments,
+          });
+        }, 0)
+      }
     },
     toggleAttachments() {
       this.showAttachments = !this.showAttachments;
@@ -474,6 +479,10 @@ textarea {
   animation: slideIn 0.5s ease-out;
 }
 
+.section-leave-active {
+  animation: slideOut 0.5s ease-out;
+}
+
 .comments {
   display: flex;
   flex-direction: column;
@@ -557,6 +566,15 @@ textarea {
     right: -100%;
   }
   to {
+    right: 0px;
+  }
+}
+@keyframes slideOut {
+  from {
+    right: 0px;
+  }
+  to {
+    right: -100%;
   }
 }
 </style>

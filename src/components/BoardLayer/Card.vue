@@ -55,11 +55,9 @@
                                                   'background-size': 'cover',
                                               }
                                             : { background: 'white' },
-                                        { color: 'grey' },
-                                        { 'font-size': '.5em' },
                                     ]"
                                 >
-                                    {{ file.filename }}
+                                    <span>{{ file.filename }}</span>
                                     <img
                                         src="@/assets/delete.png"
                                         alt="Delete button"
@@ -90,14 +88,44 @@
                         </div>
                     </div>
                 </div>
-                <textarea
-                    class="comment-input"
-                    ref="commentInput"
-                    v-on:input="resizeTextarea('commentInput')"
-                    v-on:keydown.enter="sendComment"
-                    v-model="comment"
-                    placeholder="Share your opinion, I like it..."
-                ></textarea>
+                <div
+                    class="new-comment"
+                    @dragover.prevent="this.dragoveringComment = true"
+                    @dragleave="this.dragoveringComment = false"
+                    @drop.prevent="
+                        this.prepareUpload = true;
+                        dropFile($event);
+                    "
+                >
+                    <div v-if="dragoveringComment" class="file-drop">
+                        Drop your files!
+                    </div>
+                    <div v-else class="comment-input-area">
+                        <textarea
+                            class="comment-input"
+                            ref="commentInput"
+                            v-on:input="resizeTextarea('commentInput')"
+                            v-on:keydown.enter="sendComment"
+                            v-model="comment"
+                            placeholder="Share your opinion, I like it..."
+                        ></textarea>
+                        <img
+                            src="@/assets/attachment.png"
+                            alt="Attach button"
+                            class="button"
+                            @click.stop="attachFile"
+                        />
+                        <span class="prepare" v-if="ifPreparingUpload()"
+                            >+</span
+                        >
+                        <img
+                            src="@/assets/send.png"
+                            alt="Send button"
+                            class="button"
+                            @click.stop="sendComment"
+                        />
+                    </div>
+                </div>
             </div>
         </transition>
     </div>
@@ -134,6 +162,8 @@ export default {
             comments: this.card.comments || [],
             comment: "",
             dragovering: false,
+            dragoveringComment: false,
+            prepareUpload: false,
         };
     },
     methods: {
@@ -153,12 +183,13 @@ export default {
             this.$refs.file.click();
         },
         dropFile(e) {
-            console.log("drop");
             this.$refs.file.files = e.dataTransfer.files;
             this.uploadFile();
             this.dragovering = false;
+            this.dragoveringComment = false;
         },
         async uploadFile() {
+            if (this.prepareUpload) return;
             const files = this.$refs.file.files;
             if (files.length === 0) {
                 return await this.alert("No files selected");
@@ -225,9 +256,18 @@ export default {
                 body,
             });
         },
+        attachFile() {
+            this.triggerUpload();
+            if (this.$refs.file.files) this.prepareUpload = true;
+        },
+        ifPreparingUpload() {
+            return !!this?.$refs?.file?.files.length;
+        },
         async sendComment(e) {
             if (e.shiftKey) return;
             e.preventDefault();
+            this.prepareUpload = false;
+            this.$refs.commentInput.blur();
             if (this.comment === "") {
                 return;
             }
@@ -237,6 +277,7 @@ export default {
                 body,
             });
             if (res.status === 201) {
+                this.uploadFile();
                 this.comment = "";
                 const json = await res.json();
                 console.log(json);
@@ -258,20 +299,25 @@ export default {
             }
         },
         async deleteFile(fileUid) {
+            if (
+                !(await this.confirm(
+                    `Are you sure you want to delete this file?`
+                ))
+            )
+                return;
             const res = await this.request(
                 `/cards/${this.card.uid}/upload/${fileUid}`,
                 {
                     method: "DELETE",
                 }
             );
-            console.log(res.status);
             if (res.status === 202) {
                 const index = this.files.findIndex(
                     (file) => file.uid === fileUid
                 );
                 this.files.splice(index, 1);
             } else {
-                await this.alert("Could not delete file");
+                await this.alert("Could not delete file"); //TODO: doesn't work, pewnie potrzebuje tych modali
             }
         },
     },
@@ -355,12 +401,13 @@ textarea {
     display: inline-block;
 }
 
-.attachments .file-drop {
+.file-drop {
     min-height: 100px;
     background-color: rgba(255, 255, 255, 0.137);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: white;
 }
 
 .attachments .file-container {
@@ -375,9 +422,15 @@ textarea {
     width: 75px;
     height: 50px;
     border-radius: 5px;
-    padding-left: 5px;
     overflow-y: clip;
     position: relative;
+}
+.attachments span {
+    position: absolute;
+    bottom: 0;
+    font-size: 0.8em;
+    color: black;
+    background-color: white;
 }
 
 .attachments .file > .button {
@@ -386,7 +439,7 @@ textarea {
     padding: 3px;
     cursor: pointer;
     width: 15px;
-    bottom: 0;
+    top: 0;
     right: 0;
 }
 
@@ -413,7 +466,32 @@ textarea {
     align-content: space-between;
 }
 
+.comment-input-area {
+    position: relative;
+    display: grid;
+    grid-template-columns: 90% auto;
+    grid-template-areas:
+        "input attach"
+        "input send";
+}
+
+.comment-input-area .button {
+    background-color: #56af9f;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    width: 25px;
+    place-self: center;
+}
+
+.comment-input-area .prepare {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 .comment-input {
+    grid-area: input;
     border-width: 0 0 2px;
     border-color: #56af9f;
     background-color: rgba(255, 255, 255, 0);

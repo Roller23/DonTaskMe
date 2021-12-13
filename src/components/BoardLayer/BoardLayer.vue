@@ -130,7 +130,7 @@
 		<Card
 			v-if="cardSelected"
 			:card="cardSelected"
-			@unselected="cardSelected = null"
+			@unselected="unselectCard"
 		/>
 	</transition>
 	<ModalBox ref="modal"></ModalBox>
@@ -308,6 +308,13 @@ export default {
 		selectCard(task) {
 			console.log(task);
 			this.cardSelected = task;
+		},
+		unselectCard({ title, description, files, comments }) {
+			this.cardSelected.title = title;
+			this.cardSelected.description = description;
+			this.cardSelected.files = files;
+			this.cardSelected.comments = comments;
+			this.cardSelected = null;
 		},
 	},
 	async mounted() {

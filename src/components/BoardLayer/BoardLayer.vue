@@ -77,6 +77,7 @@
                                     <template #item="task">
                                         <div
                                             class="task"
+                                            :style="{backgroundColor: task.element.color}"
                                             @click="
                                                 selectCard(
                                                     list.element.tasks[
@@ -85,32 +86,34 @@
                                                 )
                                             "
                                         >
-                                            <div>
-                                                {{ task.element.title }}
-                                            </div>
-                                            <div class="buttons">
-                                                <img
-                                                    src="@/assets/edit.png"
-                                                    alt="Edit button"
-                                                    class="button"
-                                                    @click.stop="
-                                                        editTask(
-                                                            list.index,
-                                                            task
-                                                        )
-                                                    "
-                                                />
-                                                <img
-                                                    src="@/assets/delete.png"
-                                                    alt="Delete button"
-                                                    class="button"
-                                                    @click.stop="
-                                                        deleteTask(
-                                                            list.element,
-                                                            task.element
-                                                        )
-                                                    "
-                                                />
+                                            <div class="white-wrap">
+                                                <div>
+                                                    {{ task.element.title }}
+                                                </div>
+                                                <div class="buttons">
+                                                    <img
+                                                        src="@/assets/edit.png"
+                                                        alt="Edit button"
+                                                        class="button"
+                                                        @click.stop="
+                                                            editTask(
+                                                                list.index,
+                                                                task
+                                                            )
+                                                        "
+                                                    />
+                                                    <img
+                                                        src="@/assets/delete.png"
+                                                        alt="Delete button"
+                                                        class="button"
+                                                        @click.stop="
+                                                            deleteTask(
+                                                                list.element,
+                                                                task.element
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </template>
@@ -132,6 +135,7 @@
             :card="cardSelected"
             :modal="this.$refs.modal"
             @unselected="unselectCard"
+            @colorChanged="changeCardColor"
         />
     </transition>
     <ModalBox ref="modal"></ModalBox>
@@ -143,12 +147,13 @@ import ModalBox from "../ModalBox.vue";
 import Card from "./Card.vue";
 
 class Task {
-    constructor(title, uid, description, files, comments) {
+    constructor(title, uid, description, files, comments, color) {
         this.title = title;
         this.uid = uid;
         this.description = description;
         this.files = files;
         this.comments = comments;
+        this.color = color;
     }
 }
 
@@ -310,6 +315,10 @@ export default {
             console.log(task);
             this.cardSelected = task;
         },
+        changeCardColor(color) {
+            if (!this.cardSelected) return;
+            this.cardSelected.color = color
+        },
         unselectCard({ title, description, files, comments }) {
             this.cardSelected.title = title;
             this.cardSelected.description = description;
@@ -337,7 +346,8 @@ export default {
                                 card.uid,
                                 card.description,
                                 card.files,
-                                card.comments
+                                card.comments,
+                                card.color
                             )
                         );
                     }
@@ -496,16 +506,25 @@ export default {
     transition: transform 0.5s;
 }
 .task {
-    background-color: white;
     margin-bottom: 10px;
     border-radius: 5px;
+    background-color: rgb(172, 172, 172);
+}
+.task:hover .white-wrap {
+    transform: translate(10%);
+}
+.task .white-wrap {
     padding: 10px 15px;
     display: flex;
     justify-content: space-between;
+    border-radius: 5px;
+    background-color: white;
+    transition: 0.2s;
+    transform: translate(6%);
 }
-.task:hover {
+.task .white-wrap:hover {
     cursor: grab;
-    background-color: rgb(243, 243, 243);
+    background-color: rgb(235, 235, 235);
 }
 .task:hover .buttons {
     visibility: visible;

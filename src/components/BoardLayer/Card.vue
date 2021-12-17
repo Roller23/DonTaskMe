@@ -2,7 +2,13 @@
     <div class="overlay" @click.stop="unselect($event)">
         <transition name="section" mode="out-in" appear>
             <div class="card" v-if="this.showCard">
-                <p>{{ cardDate(this.card.timestamp) }}</p>
+                <div class="label" :style="{backgroundColor: this.color}" @click="pickColor"></div>
+                <p>
+                  <input type="color" class="colorpicker" ref="colorpicker"
+                  @change="changeColor" @input="updateColor" v-model="this.color">
+                  <button class="picker" type="button" @click="pickColor">Pick colour</button>
+                  {{ cardDate(this.card.timestamp) }}
+                </p>
                 <textarea
                     class="title"
                     ref="titleInput"
@@ -185,6 +191,7 @@ export default {
             dragoveringComment: false,
             prepareUpload: false,
             showCard: true,
+            color: this.card.color
         };
     },
     methods: {
@@ -197,6 +204,23 @@ export default {
         async confirm(text, title = "") {
             return await this.modal.confirm(text, title);
         },
+        pickColor() {
+          this.$refs.colorpicker.click();
+        },
+        updateColor() {
+          this.$emit("colorChanged", this.$refs.colorpicker.value);
+        },
+        async changeColor() {
+          const body = {color: this.$refs.colorpicker.value};
+          const res = await this.request(`/cards/${this.card.uid}`, {
+              method: "PUT",
+              body,
+          });
+          console.log('update card color status', res.status)
+          if (res.status === 202) {
+            this.$emit("colorChanged", body.color);
+          }
+        },
         unselect(e) {
             if (e.target.className === "overlay") {
                 this.showCard = false;
@@ -205,7 +229,7 @@ export default {
                         title: this.title,
                         description: this.description,
                         files: this.files,
-                        comments: this.comments,
+                        comments: this.comments
                     });
                 }, 0);
             }
@@ -420,9 +444,56 @@ textarea {
     max-height: 250px;
 }
 
+.card .label {
+  position: absolute;
+  left: 0px;
+  top: 2%;
+  height: 40%;
+  width: 100px;
+  border-radius: 40px 0px 0px 40px;
+  transform: translateX(-20px);
+  z-index: -1;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card .label:hover {
+  transform: translateX(-35px);
+}
+
 .card > p {
     color: gray;
     text-align: right;
+    position: relative;
+}
+
+.card .picker {
+  position: absolute;
+  left: 0px;
+  top: 50%;
+  cursor: pointer;
+  outline: none;
+  transform: translateY(-50%);
+  background-color: transparent;
+  border: 2px solid #56af9f;
+  color: #56af9f;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 5px 15px;
+  transition: 0.2s;
+}
+
+.card .picker:hover {
+  color: rgb(36, 36, 36);
+  background-color: #56af9f;
+}
+
+.card .colorpicker {
+  position: absolute;
+  left: 0px;
+  bottom: -20px;
+  visibility: hidden;
 }
 
 .card .title {

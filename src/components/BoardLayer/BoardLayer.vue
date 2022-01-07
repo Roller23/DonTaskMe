@@ -241,7 +241,17 @@ export default {
             if (title === null) {
                 return;
             }
-            this.lists[listId].tasks[task.index].title = title;
+            const body = {title};
+            const res = await this.request(`/cards/${task.element.uid}`, {
+                method: "PUT",
+                body,
+            });
+            if (res.status === 202) {
+                this.lists[listId].tasks[task.index].title = title;
+                return;
+            }
+            console.log(res)
+            await this.alert('Could not update the card');
         },
         async deleteTask(list, task) {
             if (

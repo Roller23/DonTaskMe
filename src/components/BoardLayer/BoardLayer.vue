@@ -288,7 +288,7 @@ export default {
             const body = {title};
             console.log(`/lists/${id}`, body);
             const res = await this.request(`/lists/${id}`, {method: 'PUT', body});
-            if (res.status === 200) {
+            if (res.status === 202) {
                 this.lists[listId].title = title;
                 return;
             }

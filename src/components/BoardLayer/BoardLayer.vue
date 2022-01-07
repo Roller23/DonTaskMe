@@ -184,8 +184,8 @@ export default {
         async alert(text, title = "") {
             return await this.$refs.modal.alert(text, title);
         },
-        async prompt(title = "") {
-            return await this.$refs.modal.prompt(title);
+        async prompt(title = "", defaultValue = "") {
+            return await this.$refs.modal.prompt(title, defaultValue);
         },
         async confirm(text, title = "") {
             return await this.$refs.modal.confirm(text, title);
@@ -276,17 +276,22 @@ export default {
             selectedList.optionsOpen = !selectedList.optionsOpen;
         },
         async editList(listId, list) {
-            const title = await this.prompt(
-                "New list title",
-                list.element.title
-            );
+            const title = await this.prompt("New list title", list.element.title);
             if (title === "") {
                 return await this.alert("Title cannot be empty");
             }
             if (title === null) {
                 return;
             }
-            this.lists[listId].title = title;
+            if (title === list.element.title) return;
+            const id = list.element.uid;
+            const body = {title};
+            const res = await this.request(`/lists/${id}`, {method: 'PUT', body});
+            if (res.status === 202) {
+                this.lists[listId].title = title;
+                return;
+            }
+            console.log('Could not update list', res)
         },
         async deleteList(listId, list) {
             if (

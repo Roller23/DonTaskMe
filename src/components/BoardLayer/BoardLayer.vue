@@ -78,6 +78,7 @@
                                         <div
                                             class="task"
                                             :style="{backgroundColor: task.element.color}"
+                                            @drop="onCardDrop(task.element)"
                                             @click="
                                                 selectCard(
                                                     list.element.tasks[
@@ -260,6 +261,21 @@ export default {
             } else {
                 await this.alert("Could not delete the task");
             }
+        },
+        onCardDrop(card) {
+            setTimeout(async () => {
+                const newList = this.lists.find(l => !!l.tasks.find(t => t.uid === card.uid))
+                console.log('card dropped', card, newList)
+                if (!newList) {
+                    return await this.alert('Could not move the card');
+                }
+                const body = {listUID: newList.uid};
+                const res = await this.request(`/cards/move/${card.uid}`, {method: 'PUT', body})
+                if (res.status !== 202) {
+                    console.log('could not move the card', res)
+                    await this.alert('An error occured while moving the card');
+                }
+            }, 100)
         },
         showListOptions(selectedList, hide) {
             if (hide) {

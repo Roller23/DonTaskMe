@@ -9,20 +9,21 @@
 </template>
 
 <script>
-import LoginBox from './LoginBox.vue'
-import Logo from './Logo.vue'
+import LoginBox from "./LoginBox.vue";
+import Logo from "./Logo.vue";
 
 export default {
-  name: 'LoginLayer',
+  name: "LoginLayer",
   components: {
-    LoginBox, Logo
+    LoginBox,
+    Logo,
   },
   data() {
     return {
-      visible: true
-    }
-  }
-}
+      visible: true,
+    };
+  },
+};
 </script>
 
 
@@ -45,10 +46,12 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.55);
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

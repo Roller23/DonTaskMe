@@ -269,7 +269,7 @@ export default {
                 if (!newList) {
                     return await this.alert('Could not move the card');
                 }
-                const body = {listUID: newList.uid};
+                const body = {list_uid: newList.uid};
                 const res = await this.request(`/cards/move/${card.uid}`, {method: 'PUT', body})
                 if (res.status !== 202) {
                     console.log('could not move the card', res)

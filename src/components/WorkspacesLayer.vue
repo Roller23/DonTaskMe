@@ -2,6 +2,7 @@
   <transition name="fade">
     <div class="layer" v-if="visible">
       <div class="boxes-wrap">
+        <img src="@/assets/logout.webp" alt="Logout" class="logout-btn" @click="logout">
         <div class="workspaces" :class="{ hidden: currentWorkspace !== null }">
           <div
             class="back-wrap"
@@ -212,6 +213,10 @@ export default {
         await this.alert("Could not delete the board");
       }
     },
+    logout() {
+      localStorage.removeItem('token');
+      window.location.reload();
+    },
     async getWorkspaces() {
       const res = await this.request("/workspaces");
       if (res.status === 200) {
@@ -356,6 +361,16 @@ export default {
 .boxes-wrap {
   height: 100%;
   white-space: nowrap;
+  position: relative;
+}
+.boxes-wrap .logout-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  cursor: pointer;
+  display: block;
+  z-index: 5;
 }
 .workspaces {
   width: 50%;

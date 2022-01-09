@@ -37,6 +37,7 @@ export default {
   background-image: url(../assets/don-background.jpeg);
   background-size: cover;
   background-position: center center;
+  z-index: 10;
 }
 .blur-layer {
   position: absolute;
